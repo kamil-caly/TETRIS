@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "ES2022",
+        "outDir": "compiledJS",
+        "sourceMap": true,
+        "lib": ["es2022", "dom"],
+    }
+}
