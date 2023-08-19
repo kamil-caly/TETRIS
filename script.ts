@@ -67,6 +67,8 @@ const updateHTMLBoard = (): void => {
                     break;
     
                 case contentType.EMPTY:
+                    removeAllClassesButNotField(field);
+                    break;
                 default:
                     break;
             }

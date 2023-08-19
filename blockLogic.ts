@@ -5,6 +5,7 @@ const holdBlockHolderHTML = document.getElementById('hold_block_holder');
 const nextBlockHolderHTML = document.getElementById('next_block_holder');
 let nextBlock, holdBlock, currentBlock: null | string = null;
 const boardArray: boardContent[] = [];
+let gameDelay: number = 1000;
 
 export const getBoardArray = (): boardContent[] => {
     return boardArray;
@@ -13,7 +14,8 @@ export const getBoardArray = (): boardContent[] => {
 export type boardContent = {
     x: number;
     y: number;
-    content: string | null;
+    content: string | null; // contentType
+    isMoving: boolean;
 }
 
 export const contentType = {
@@ -40,7 +42,7 @@ export const blocks = {
 export const initBoard = (): boardContent[] => {
     for(let x = 0; x < rows; x++) {
         for (let y = 0; y < cols; y++) {
-            const field: boardContent = {x: x, y: y, content: contentType.EMPTY};
+            const field: boardContent = {x: x, y: y, content: contentType.EMPTY, isMoving: false};
             boardArray.push(field);
         }
     }
@@ -67,6 +69,7 @@ const spawnNewBlock = (block: string): void => {
         boardArray.forEach(e => {
             if (blockPos.some(p => p.x === e.x && p.y === e.y)) {
                 e.content = content;
+                e.isMoving = true;
             }
         });
     }
@@ -142,8 +145,27 @@ const spawnNewBlock = (block: string): void => {
     }
 }
 
-const mainLoop = () => {
+const checkCollision = (movingBlock: boardContent[]): boolean => {
+    movingBlock.forEach(part => {
+        if(part.x === rows - 1)
+            return true;
 
+        const bottomField: boardContent = boardArray.find(e => e.y === part.y && e.x === part.x + 1 && !e.isMoving);
+        if(bottomField.content !== contentType.EMPTY)
+            return true;
+    });
+
+    return false;
+}
+
+const blockFallDownLogic = () => {
+    if(checkCollision(boardArray.filter(e => e.isMoving))) {
+
+    }
+}
+
+const mainLoop = () => {
+    blockFallDownLogic();
 }
 
 export const blockLogicInit = () => {
@@ -154,5 +176,5 @@ export const blockLogicInit = () => {
     nextBlock = getRandomBlock(currentBlock);
     nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
 
-    mainLoop();
+    setInterval(mainLoop, gameDelay);
 }

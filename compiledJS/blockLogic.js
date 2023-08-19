@@ -4,6 +4,7 @@ const holdBlockHolderHTML = document.getElementById('hold_block_holder');
 const nextBlockHolderHTML = document.getElementById('next_block_holder');
 let nextBlock, holdBlock, currentBlock = null;
 const boardArray = [];
+const gameDelay = 500;
 export const getBoardArray = () => {
     return boardArray;
 };
@@ -29,7 +30,7 @@ export const blocks = {
 export const initBoard = () => {
     for (let x = 0; x < rows; x++) {
         for (let y = 0; y < cols; y++) {
-            const field = { x: x, y: y, content: contentType.EMPTY };
+            const field = { x: x, y: y, content: contentType.EMPTY, isMoving: false };
             boardArray.push(field);
         }
     }
@@ -49,6 +50,7 @@ const spawnNewBlock = (block) => {
         boardArray.forEach(e => {
             if (blockPos.some(p => p.x === e.x && p.y === e.y)) {
                 e.content = content;
+                e.isMoving = true;
             }
         });
     };
@@ -107,12 +109,18 @@ const spawnNewBlock = (block) => {
             break;
     }
 };
-export const gameInit = () => {
+const blockFallDownLogic = () => {
+    console.log('test');
+};
+const mainLoop = () => {
+    blockFallDownLogic();
+};
+export const blockLogicInit = () => {
     initBoard();
     currentBlock = getRandomBlock();
     spawnNewBlock(currentBlock);
     nextBlock = getRandomBlock(currentBlock);
     nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
-    console.log(boardArray);
+    setInterval(mainLoop, gameDelay);
 };
 //# sourceMappingURL=blockLogic.js.map

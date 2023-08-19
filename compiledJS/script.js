@@ -1,4 +1,4 @@
-import { gameInit, getBoardArray, contentType } from "./blockLogic.js";
+import { blockLogicInit, getBoardArray, contentType } from "./blockLogic.js";
 const boardHTML = document.getElementsByClassName('board')[0];
 const scoreHTML = document.getElementsByClassName('score')[0];
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
@@ -13,7 +13,7 @@ const initHTMLBoard = () => {
         }
     }
 };
-const updateBoard = () => {
+const updateHTMLBoard = () => {
     const boardArray = getBoardArray();
     const removeAllClassesButNotField = (div) => {
         div.classList.forEach(className => {
@@ -52,6 +52,8 @@ const updateBoard = () => {
                     setNewFieldClass(field, contentType.Z);
                     break;
                 case contentType.EMPTY:
+                    removeAllClassesButNotField(field);
+                    break;
                 default:
                     break;
             }
@@ -60,8 +62,8 @@ const updateBoard = () => {
 };
 const main = () => {
     initHTMLBoard();
-    gameInit();
-    updateBoard();
+    blockLogicInit();
+    updateHTMLBoard();
 };
 main();
 //# sourceMappingURL=script.js.map
