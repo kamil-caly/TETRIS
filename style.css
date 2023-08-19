@@ -1,9 +1,9 @@
 :root {
     --empty-block-size: 160px;
     --field-size: 40px;
+    --block-size: 44px; /* 40px + 2px (border one side) + 2px (border other side */
     --board-cols: 10;
     --board-rows: 20;
-    --board-gap: 3px;
 }
 
 body {
@@ -22,10 +22,9 @@ body {
 .board {
     background-color: #1d1c1d;
     display: grid;
-    gap: var(--board-gap);
     grid-template-columns: repeat(var(--board-cols), 1fr);
     grid-template-rows: repeat(var(--board-rows), 1fr);
-    border: var(--board-gap) solid #1d1c1d;
+    border: 2px solid #1d1c1d;
     border-radius: 2px;
 }
 
@@ -33,36 +32,58 @@ body {
     width: var(--field-size);
     height: var(--field-size);
     background-color: black;
+    border: solid 2px #1d1c1d;
     border-radius: 2px;
     background-size: cover;
 }
 
 .field_I {
     background-image: url('./assets/TileCyan.png');
+    border: none !important;
+    width: var(--block-size) !important;
+    height: var(--block-size) !important;
 }
 
 .field_J {
     background-image: url('./assets/TileBlue.png');
+    border: none !important;
+    width: var(--block-size) !important;
+    height: var(--block-size) !important;
 }
 
 .field_L {
     background-image: url('./assets/TileOrange.png');
+    border: none !important;
+    width: var(--block-size) !important;
+    height: var(--block-size) !important;
 }
 
 .field_O {
     background-image: url('./assets/TileYellow.png');
+    border: none !important;
+    width: var(--block-size) !important;
+    height: var(--block-size) !important;
 }
 
 .field_S {
     background-image: url('./assets/TileGreen.png');
+    border: none !important;
+    width: var(--block-size) !important;
+    height: var(--block-size) !important;
 }
 
 .field_T {
     background-image: url('./assets/TilePurple.png');
+    border: none !important;
+    width: var(--block-size) !important;
+    height: var(--block-size) !important;
 }
 
 .field_Z {
     background-image: url('./assets/TileRed.png');
+    border: none !important;
+    width: var(--block-size) !important;
+    height: var(--block-size) !important;
 }
 
 .center {
