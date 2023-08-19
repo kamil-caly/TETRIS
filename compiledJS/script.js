@@ -1,19 +1,67 @@
+import { gameInit, getBoardArray, contentType } from "./blockLogic.js";
 const boardHTML = document.getElementsByClassName('board')[0];
 const scoreHTML = document.getElementsByClassName('score')[0];
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
-const fillBoard = () => {
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
+const initHTMLBoard = () => {
+    for (let x = 0; x < rows; x++) {
+        for (let y = 0; y < cols; y++) {
             const field = document.createElement('div');
             field.classList.add('field');
-            field.id = y + '-' + x;
+            field.id = x + '-' + y;
             boardHTML.appendChild(field);
         }
     }
 };
+const updateBoard = () => {
+    const boardArray = getBoardArray();
+    const removeAllClassesButNotField = (div) => {
+        div.classList.forEach(className => {
+            if (className !== 'field') {
+                div.classList.remove(className);
+            }
+        });
+    };
+    const setNewFieldClass = (div, contentType) => {
+        div.classList.length > 1 && removeAllClassesButNotField(div);
+        div.classList.add(`field_${contentType}`);
+    };
+    boardArray.forEach(e => {
+        const field = document.getElementById(`${e.x}-${e.y}`);
+        if (field) {
+            switch (e.content) {
+                case contentType.I:
+                    setNewFieldClass(field, contentType.I);
+                    break;
+                case contentType.J:
+                    setNewFieldClass(field, contentType.J);
+                    break;
+                case contentType.L:
+                    setNewFieldClass(field, contentType.L);
+                    break;
+                case contentType.O:
+                    setNewFieldClass(field, contentType.O);
+                    break;
+                case contentType.S:
+                    setNewFieldClass(field, contentType.S);
+                    break;
+                case contentType.T:
+                    setNewFieldClass(field, contentType.T);
+                    break;
+                case contentType.Z:
+                    setNewFieldClass(field, contentType.Z);
+                    break;
+                case contentType.EMPTY:
+                default:
+                    break;
+            }
+        }
+    });
+};
 const main = () => {
-    fillBoard();
+    initHTMLBoard();
+    gameInit();
+    updateBoard();
 };
 main();
 //# sourceMappingURL=script.js.map

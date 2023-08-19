@@ -34,6 +34,35 @@ body {
     height: var(--field-size);
     background-color: black;
     border-radius: 2px;
+    background-size: cover;
+}
+
+.field_I {
+    background-image: url('./assets/TileCyan.png');
+}
+
+.field_J {
+    background-image: url('./assets/TileBlue.png');
+}
+
+.field_L {
+    background-image: url('./assets/TileOrange.png');
+}
+
+.field_O {
+    background-image: url('./assets/TileYellow.png');
+}
+
+.field_S {
+    background-image: url('./assets/TileGreen.png');
+}
+
+.field_T {
+    background-image: url('./assets/TilePurple.png');
+}
+
+.field_Z {
+    background-image: url('./assets/TileRed.png');
 }
 
 .center {
@@ -54,7 +83,8 @@ body {
 }
 
 .block_holder {
-    background-color: black;
+    background-color: #101010;
+    background-size: cover;
     border-radius: 20px;
     height: var(--empty-block-size);
     width: var(--empty-block-size);
