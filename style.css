@@ -1,6 +1,61 @@
+:root {
+    --empty-block-size: 160px;
+    --field-size: 40px;
+    --board-cols: 10;
+    --board-rows: 20;
+    --board-gap: 3px;
+}
+
 body {
     margin: 0;
     padding: 0;
     height: 100vh;
     background: radial-gradient(circle at center, #9200ff, #100025); 
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    color: #f1caff;
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.board {
+    background-color: #1d1c1d;
+    display: grid;
+    gap: var(--board-gap);
+    grid-template-columns: repeat(var(--board-cols), 1fr);
+    grid-template-rows: repeat(var(--board-rows), 1fr);
+    border: var(--board-gap) solid #1d1c1d;
+    border-radius: 2px;
+}
+
+.board .field {
+    width: var(--field-size);
+    height: var(--field-size);
+    background-color: black;
+    border-radius: 2px;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    justify-content: space-evenly;
+    padding: 0 25px;
+}
+
+.block_holder_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: calc(var(--empty-block-size) + 60px);
+    justify-content: space-between;
+}
+
+.block_holder {
+    background-color: black;
+    border-radius: 20px;
+    height: var(--empty-block-size);
+    width: var(--empty-block-size);
 }

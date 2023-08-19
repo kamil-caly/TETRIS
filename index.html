@@ -6,10 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TETRIS</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="./assets/Icon.ico" type="image/x-icon">
 </head>
 
 <body>
-    <div class="board">
+    <div class="block_holder_container">
+        <div>Hold</div>
+        <div class="block_holder"></div>
+    </div>
+    <div class="center">
+        <div class="score">Score: 0</div>
+        <div class="board">
+            <div class="field"></div>
+        </div>
+    </div>
+    <div class="block_holder_container">
+        <div>Next</div>
+        <div class="block_holder"></div>
     </div>
     <script type="module" src="compiledJS/script.js"></script>
 </body>
