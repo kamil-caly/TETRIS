@@ -1,4 +1,5 @@
-import { blockLogicInit, getBoardArray, contentType, getGameDelay, blockFallDownLogic } from "./blockLogic.js";
+import { blockLogicInit, getBoardArray, getGameDelay, blockFallDownLogic } from "./blockLogic.js";
+import { blockContent } from "./types.js";
 const boardHTML = document.getElementsByClassName('board')[0];
 const scoreHTML = document.getElementsByClassName('score')[0];
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
@@ -22,36 +23,36 @@ const updateHTMLBoard = () => {
             }
         });
     };
-    const setNewFieldClass = (div, contentType) => {
+    const setNewFieldClass = (div, blockContent) => {
         div.classList.length > 1 && removeAllClassesButNotField(div);
-        div.classList.add(`field_${contentType}`);
+        div.classList.add(`field_${blockContent}`);
     };
     boardArray.forEach(e => {
         const field = document.getElementById(`${e.x}-${e.y}`);
         if (field) {
             switch (e.content) {
-                case contentType.I:
-                    setNewFieldClass(field, contentType.I);
+                case blockContent.I:
+                    setNewFieldClass(field, blockContent.I);
                     break;
-                case contentType.J:
-                    setNewFieldClass(field, contentType.J);
+                case blockContent.J:
+                    setNewFieldClass(field, blockContent.J);
                     break;
-                case contentType.L:
-                    setNewFieldClass(field, contentType.L);
+                case blockContent.L:
+                    setNewFieldClass(field, blockContent.L);
                     break;
-                case contentType.O:
-                    setNewFieldClass(field, contentType.O);
+                case blockContent.O:
+                    setNewFieldClass(field, blockContent.O);
                     break;
-                case contentType.S:
-                    setNewFieldClass(field, contentType.S);
+                case blockContent.S:
+                    setNewFieldClass(field, blockContent.S);
                     break;
-                case contentType.T:
-                    setNewFieldClass(field, contentType.T);
+                case blockContent.T:
+                    setNewFieldClass(field, blockContent.T);
                     break;
-                case contentType.Z:
-                    setNewFieldClass(field, contentType.Z);
+                case blockContent.Z:
+                    setNewFieldClass(field, blockContent.Z);
                     break;
-                case contentType.EMPTY:
+                case blockContent.EMPTY:
                     removeAllClassesButNotField(field);
                     break;
                 default:
