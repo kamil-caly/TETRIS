@@ -116,15 +116,19 @@ const checkCollision = (movingBlock, right, left, down, up) => {
     }
     return false;
 };
-const moveBlockDown = () => {
+const moveBlockLogic = (movingBlock, right, left, down) => {
     let nextBlockPos = [];
-    boardArray.filter(e => e.isMoving).forEach(e => {
-        nextBlockPos.push({ x: e.x + 1, y: e.y, content: e.content, isMoving: true });
+    movingBlock.forEach(e => {
+        nextBlockPos.push({
+            x: e.x + (down ? down : 0),
+            y: e.y + (right ? right : 0) - (left ? left : 0),
+            content: e.content, isMoving: true
+        });
         e.isMoving = false;
         e.content = blockContent.EMPTY;
     });
     boardArray.forEach(e => {
-        const nextBlock = nextBlockPos.find(b => b.x === e.x && b.y === e.y);
+        const nextBlock = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
         if (nextBlock) {
             e.isMoving = true;
             e.content = nextBlock.content;
@@ -141,9 +145,31 @@ export const blockFallDownLogic = () => {
         nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
     }
     else {
-        moveBlockDown();
+        moveBlockLogic(boardArray.filter(e => e.isMoving), 0, 0, 1);
     }
 };
+// --------------------------------- Player's Moves --------------------------------- //
+document.addEventListener('keydown', event => {
+    const movingBlock = boardArray.filter(e => e.isMoving);
+    console.log();
+    switch (event.key) {
+        case 'ArrowRight':
+            !checkRightCollision(movingBlock) && moveBlockRight(movingBlock);
+            break;
+        case 'ArrowLeft':
+            !checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
+            break;
+        default:
+            break;
+    }
+});
+const moveBlockRight = (movingBlock) => {
+    moveBlockLogic(movingBlock, 1);
+};
+const moveBlockLeft = (movingBlock) => {
+    moveBlockLogic(movingBlock, 0, 1);
+};
+// --------------------------------- Initial function --------------------------------- //
 export const blockLogicInit = () => {
     initBoard();
     currentBlock = getRandomBlock();

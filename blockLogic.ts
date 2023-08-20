@@ -1,4 +1,4 @@
-import { boardContent, blockContent, blocksType } from "./types.js";
+import { boardContent, blockContent, blocksType, direction } from "./types.js";
 
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
@@ -119,33 +119,35 @@ const spawnNewBlock = (block: string): void => {
     }
 }
 
-const checkDownCollision = (movingBlock: boardContent[]): boolean =>  checkCollision(movingBlock, 0, 0, 1);
+// --------------------------------- Collision Logic --------------------------------- //
 
-const checkRightCollision = (movingBlock: boardContent[]): boolean => checkCollision(movingBlock, 1);
+const checkDownCollision = (movingBlock: boardContent[]): boolean =>  checkCollision(movingBlock, direction.DOWN);
 
-const checkLeftCollision = (movingBlock: boardContent[]): boolean => checkCollision(movingBlock, 0, 1);
+const checkRightCollision = (movingBlock: boardContent[]): boolean => checkCollision(movingBlock, direction.RIGHT);
 
-const checkCollision = (movingBlock?: boardContent[], right?: number, left?: number, down?: number, up?: number): boolean => {
+const checkLeftCollision = (movingBlock: boardContent[]): boolean => checkCollision(movingBlock, direction.LEFT);
+
+const checkCollision = (movingBlock: boardContent[], dir: string): boolean => {
     for (let part of movingBlock) {
-        if (right && part.y === cols - 1) {
+        if (dir === direction.RIGHT && part.y === cols - 1) {
             return true;
         }
 
-        if (left && part.y === 0) {
+        if (dir === direction.LEFT && part.y === 0) {
             return true;
         }
 
-        if (up && part.x === 0) {
+        if (dir === direction.UP && part.x === 0) {
             return true;
         }
 
-        if (down && part.x === rows - 1) {
+        if (dir === direction.DOWN && part.x === rows - 1) {
             return true;
         }
 
         const collidingField = boardArray.find(e => 
-            e.y === part.y + (right ? right : 0) - (left ? left : 0) && 
-            e.x === part.x + (down ? down : 0) - (up ? up : 0) && 
+            e.y === part.y + (dir === direction.RIGHT ? 1 : 0) - (dir === direction.LEFT ? 1 : 0) && 
+            e.x === part.x + (dir === direction.DOWN ? 1 : 0) - (dir === direction.UP ? 1 : 0) && 
             !e.isMoving);
         if (collidingField && collidingField.content !== blockContent.EMPTY) {
             return true;
@@ -154,16 +156,20 @@ const checkCollision = (movingBlock?: boardContent[], right?: number, left?: num
     return false;
 }
 
-const moveBlockDown = () => {
+const moveBlockLogic = (movingBlock: boardContent[], dir: string) => {
     let nextBlockPos: boardContent[] = [];
-    boardArray.filter(e => e.isMoving).forEach(e => {
-        nextBlockPos.push({x: e.x + 1, y: e.y, content: e.content, isMoving: true})
+    movingBlock.forEach(e => {
+        nextBlockPos.push({
+            x: e.x + (direction.DOWN ? 1 : 0),
+            y: e.y + (direction.RIGHT ? 1 : 0) - (direction.LEFT ? 1 : 0), 
+            content: e.content, isMoving: true
+        })
         e.isMoving = false;
         e.content = blockContent.EMPTY;
     });
 
     boardArray.forEach(e => {
-        const nextBlock = nextBlockPos.find(b => b.x === e.x && b.y === e.y);
+        const nextBlock = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
         if(nextBlock) {
             e.isMoving = true;
             e.content = nextBlock.content;
@@ -180,9 +186,36 @@ export const blockFallDownLogic = () => {
         nextBlock = getRandomBlock(currentBlock);
         nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
     } else {
-        moveBlockDown();
+        moveBlockLogic(boardArray.filter(e => e.isMoving), direction.DOWN);
     }
 }
+
+// --------------------------------- Player's Moves --------------------------------- //
+
+document.addEventListener('keydown', event => {
+    const movingBlock = boardArray.filter(e => e.isMoving);
+    console.log()
+    switch (event.key) {
+        case 'ArrowRight':
+            !checkRightCollision(movingBlock) && moveBlockRight(movingBlock);
+            break;
+        case 'ArrowLeft':
+            !checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
+            break;
+        default:
+            break;
+    }
+})
+
+const moveBlockRight = (movingBlock: boardContent[]) => {
+    moveBlockLogic(movingBlock, direction.RIGHT);
+}
+
+const moveBlockLeft = (movingBlock: boardContent[]) => {
+    moveBlockLogic(movingBlock, direction.LEFT);
+}
+
+// --------------------------------- Initial function --------------------------------- //
 
 export const blockLogicInit = () => {
     initBoard();

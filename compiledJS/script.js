@@ -4,6 +4,7 @@ const boardHTML = document.getElementsByClassName('board')[0];
 const scoreHTML = document.getElementsByClassName('score')[0];
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
+const REFRESH_BOARD_DELAY = 5;
 const initHTMLBoard = () => {
     for (let x = 0; x < rows; x++) {
         for (let y = 0; y < cols; y++) {
@@ -63,6 +64,8 @@ const updateHTMLBoard = () => {
 };
 const mainLoop = () => {
     blockFallDownLogic();
+};
+const refreshHTMLBoard = () => {
     updateHTMLBoard();
 };
 const main = () => {
@@ -70,6 +73,7 @@ const main = () => {
     blockLogicInit();
     updateHTMLBoard();
     setInterval(mainLoop, getGameDelay());
+    setInterval(refreshHTMLBoard, REFRESH_BOARD_DELAY);
 };
 main();
 //# sourceMappingURL=script.js.map
