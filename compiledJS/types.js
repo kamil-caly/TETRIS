@@ -17,4 +17,10 @@ export const blocksType = {
     T_BLOCK: "Block-T",
     Z_BLOCK: "Block-Z"
 };
+export const direction = {
+    RIGHT: "RIGHT",
+    LEFT: "LEFGT",
+    DOWN: "DOWN",
+    UP: "UP"
+};
 //# sourceMappingURL=types.js.map

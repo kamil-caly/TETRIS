@@ -160,8 +160,8 @@ const moveBlockLogic = (movingBlock: boardContent[], dir: string) => {
     let nextBlockPos: boardContent[] = [];
     movingBlock.forEach(e => {
         nextBlockPos.push({
-            x: e.x + (direction.DOWN ? 1 : 0),
-            y: e.y + (direction.RIGHT ? 1 : 0) - (direction.LEFT ? 1 : 0), 
+            x: e.x + (dir === direction.DOWN ? 1 : 0),
+            y: e.y + (dir === direction.RIGHT ? 1 : 0) - (dir === direction.LEFT ? 1 : 0), 
             content: e.content, isMoving: true
         })
         e.isMoving = false;
@@ -202,6 +202,9 @@ document.addEventListener('keydown', event => {
         case 'ArrowLeft':
             !checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
             break;
+        // case 'ArrowUp':
+        //     //!checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
+        //     break;
         default:
             break;
     }

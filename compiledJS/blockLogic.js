@@ -1,4 +1,4 @@
-import { blockContent, blocksType } from "./types.js";
+import { blockContent, blocksType, direction } from "./types.js";
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
 const holdBlockHolderHTML = document.getElementById('hold_block_holder');
@@ -90,25 +90,26 @@ const spawnNewBlock = (block) => {
             break;
     }
 };
-const checkDownCollision = (movingBlock) => checkCollision(movingBlock, 0, 0, 1);
-const checkRightCollision = (movingBlock) => checkCollision(movingBlock, 1);
-const checkLeftCollision = (movingBlock) => checkCollision(movingBlock, 0, 1);
-const checkCollision = (movingBlock, right, left, down, up) => {
+// --------------------------------- Collision Logic --------------------------------- //
+const checkDownCollision = (movingBlock) => checkCollision(movingBlock, direction.DOWN);
+const checkRightCollision = (movingBlock) => checkCollision(movingBlock, direction.RIGHT);
+const checkLeftCollision = (movingBlock) => checkCollision(movingBlock, direction.LEFT);
+const checkCollision = (movingBlock, dir) => {
     for (let part of movingBlock) {
-        if (right && part.y === cols - 1) {
+        if (dir === direction.RIGHT && part.y === cols - 1) {
             return true;
         }
-        if (left && part.y === 0) {
+        if (dir === direction.LEFT && part.y === 0) {
             return true;
         }
-        if (up && part.x === 0) {
+        if (dir === direction.UP && part.x === 0) {
             return true;
         }
-        if (down && part.x === rows - 1) {
+        if (dir === direction.DOWN && part.x === rows - 1) {
             return true;
         }
-        const collidingField = boardArray.find(e => e.y === part.y + (right ? right : 0) - (left ? left : 0) &&
-            e.x === part.x + (down ? down : 0) - (up ? up : 0) &&
+        const collidingField = boardArray.find(e => e.y === part.y + (dir === direction.RIGHT ? 1 : 0) - (dir === direction.LEFT ? 1 : 0) &&
+            e.x === part.x + (dir === direction.DOWN ? 1 : 0) - (dir === direction.UP ? 1 : 0) &&
             !e.isMoving);
         if (collidingField && collidingField.content !== blockContent.EMPTY) {
             return true;
@@ -116,12 +117,12 @@ const checkCollision = (movingBlock, right, left, down, up) => {
     }
     return false;
 };
-const moveBlockLogic = (movingBlock, right, left, down) => {
+const moveBlockLogic = (movingBlock, dir) => {
     let nextBlockPos = [];
     movingBlock.forEach(e => {
         nextBlockPos.push({
-            x: e.x + (down ? down : 0),
-            y: e.y + (right ? right : 0) - (left ? left : 0),
+            x: e.x + (dir === direction.DOWN ? 1 : 0),
+            y: e.y + (dir === direction.RIGHT ? 1 : 0) - (dir === direction.LEFT ? 1 : 0),
             content: e.content, isMoving: true
         });
         e.isMoving = false;
@@ -145,7 +146,7 @@ export const blockFallDownLogic = () => {
         nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
     }
     else {
-        moveBlockLogic(boardArray.filter(e => e.isMoving), 0, 0, 1);
+        moveBlockLogic(boardArray.filter(e => e.isMoving), direction.DOWN);
     }
 };
 // --------------------------------- Player's Moves --------------------------------- //
@@ -159,15 +160,18 @@ document.addEventListener('keydown', event => {
         case 'ArrowLeft':
             !checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
             break;
+        // case 'ArrowUp':
+        //     //!checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
+        //     break;
         default:
             break;
     }
 });
 const moveBlockRight = (movingBlock) => {
-    moveBlockLogic(movingBlock, 1);
+    moveBlockLogic(movingBlock, direction.RIGHT);
 };
 const moveBlockLeft = (movingBlock) => {
-    moveBlockLogic(movingBlock, 0, 1);
+    moveBlockLogic(movingBlock, direction.LEFT);
 };
 // --------------------------------- Initial function --------------------------------- //
 export const blockLogicInit = () => {
