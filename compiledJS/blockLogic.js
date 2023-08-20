@@ -136,9 +136,9 @@ const moveBlockLogic = (movingBlock, dir) => {
         }
     });
 };
-export const blockFallDownLogic = () => {
+export const blockFallDownLogic = (movingBlock) => {
     console.log("board array: ", boardArray.filter(e => e.isMoving));
-    if (checkDownCollision(boardArray.filter(e => e.isMoving))) {
+    if (checkDownCollision(movingBlock)) {
         boardArray.forEach(e => e.isMoving = false);
         currentBlock = nextBlock;
         spawnNewBlock(currentBlock);
@@ -146,7 +146,7 @@ export const blockFallDownLogic = () => {
         nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
     }
     else {
-        moveBlockLogic(boardArray.filter(e => e.isMoving), direction.DOWN);
+        moveBlockLogic(movingBlock, direction.DOWN);
     }
 };
 // --------------------------------- Player's Moves --------------------------------- //
@@ -160,9 +160,9 @@ document.addEventListener('keydown', event => {
         case 'ArrowLeft':
             !checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
             break;
-        // case 'ArrowUp':
-        //     //!checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
-        //     break;
+        case 'ArrowDown':
+            !checkDownCollision(movingBlock) && moveBlockDown(movingBlock);
+            break;
         default:
             break;
     }
@@ -172,6 +172,9 @@ const moveBlockRight = (movingBlock) => {
 };
 const moveBlockLeft = (movingBlock) => {
     moveBlockLogic(movingBlock, direction.LEFT);
+};
+const moveBlockDown = (movingBlock) => {
+    blockFallDownLogic(movingBlock);
 };
 // --------------------------------- Initial function --------------------------------- //
 export const blockLogicInit = () => {

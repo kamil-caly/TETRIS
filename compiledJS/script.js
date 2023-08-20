@@ -63,7 +63,7 @@ const updateHTMLBoard = () => {
     });
 };
 const mainLoop = () => {
-    blockFallDownLogic();
+    blockFallDownLogic(getBoardArray().filter(e => e.isMoving));
 };
 const refreshHTMLBoard = () => {
     updateHTMLBoard();
