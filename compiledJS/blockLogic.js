@@ -4,10 +4,9 @@ const holdBlockHolderHTML = document.getElementById('hold_block_holder');
 const nextBlockHolderHTML = document.getElementById('next_block_holder');
 let nextBlock, holdBlock, currentBlock = null;
 const boardArray = [];
-const gameDelay = 500;
-export const getBoardArray = () => {
-    return boardArray;
-};
+let gameDelay = 300;
+export const getBoardArray = () => boardArray;
+export const getGameDelay = () => gameDelay;
 export const contentType = {
     I: "I",
     J: "J",
@@ -65,14 +64,14 @@ const spawnNewBlock = (block) => {
             break;
         case blocks.T_BLOCK:
             const T_POS = [{ x: 0, y: 4 }, { x: 1, y: 3 }, { x: 1, y: 4 }, { x: 1, y: 5 }];
-            isPlaceOnBoard = !boardArray.some(e => e.content !== contentType.EMPTY && O_POS.some(p => p.x === e.x && p.y === e.y));
+            isPlaceOnBoard = !boardArray.some(e => e.content !== contentType.EMPTY && T_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
                 setNewBlock(T_POS, contentType.T);
             }
             break;
         case blocks.I_BLOCK:
             const I_POS = [{ x: 0, y: 3 }, { x: 0, y: 4 }, { x: 0, y: 5 }, { x: 0, y: 6 }];
-            isPlaceOnBoard = !boardArray.some(e => e.content !== contentType.EMPTY && O_POS.some(p => p.x === e.x && p.y === e.y));
+            isPlaceOnBoard = !boardArray.some(e => e.content !== contentType.EMPTY && I_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
                 setNewBlock(I_POS, contentType.I);
             }
@@ -109,11 +108,56 @@ const spawnNewBlock = (block) => {
             break;
     }
 };
-const blockFallDownLogic = () => {
-    console.log('test');
+const checkDownCollision = (movingBlock) => checkCollision({ down: 1, movingBlock });
+const checkRightCollision = (movingBlock) => checkCollision({ right: 1, movingBlock });
+const checkCollision = ({ right = 0, left = 0, up = 0, down = 0, movingBlock }) => {
+    for (let part of movingBlock) {
+        if (right && part.y === cols - 1) {
+            return true;
+        }
+        if (left && part.y === 0) {
+            return true;
+        }
+        if (up && part.x === 0) {
+            return true;
+        }
+        if (down && part.x === rows - 1) {
+            return true;
+        }
+        const collidingField = boardArray.find(e => e.y === part.y + right - left && e.x === part.x + down - up && !e.isMoving);
+        if (collidingField && collidingField.content !== contentType.EMPTY) {
+            return true;
+        }
+    }
+    return false;
 };
-const mainLoop = () => {
-    blockFallDownLogic();
+const moveBlockDown = () => {
+    let nextBlockPos = [];
+    boardArray.filter(e => e.isMoving).forEach(e => {
+        nextBlockPos.push({ x: e.x + 1, y: e.y, content: e.content, isMoving: true });
+        e.isMoving = false;
+        e.content = contentType.EMPTY;
+    });
+    boardArray.forEach(e => {
+        const nextBlock = nextBlockPos.find(b => b.x === e.x && b.y === e.y);
+        if (nextBlock) {
+            e.isMoving = true;
+            e.content = nextBlock.content;
+        }
+    });
+};
+export const blockFallDownLogic = () => {
+    console.log("board array: ", boardArray.filter(e => e.isMoving));
+    if (checkDownCollision(boardArray.filter(e => e.isMoving))) {
+        boardArray.forEach(e => e.isMoving = false);
+        currentBlock = nextBlock;
+        spawnNewBlock(currentBlock);
+        nextBlock = getRandomBlock(currentBlock);
+        nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
+    }
+    else {
+        moveBlockDown();
+    }
 };
 export const blockLogicInit = () => {
     initBoard();
@@ -121,6 +165,5 @@ export const blockLogicInit = () => {
     spawnNewBlock(currentBlock);
     nextBlock = getRandomBlock(currentBlock);
     nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
-    setInterval(mainLoop, gameDelay);
 };
 //# sourceMappingURL=blockLogic.js.map

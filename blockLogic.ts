@@ -5,11 +5,11 @@ const holdBlockHolderHTML = document.getElementById('hold_block_holder');
 const nextBlockHolderHTML = document.getElementById('next_block_holder');
 let nextBlock, holdBlock, currentBlock: null | string = null;
 const boardArray: boardContent[] = [];
-let gameDelay: number = 1000;
+let gameDelay: number = 300;
 
-export const getBoardArray = (): boardContent[] => {
-    return boardArray;
-}
+export const getBoardArray = (): boardContent[] => boardArray;
+
+export const getGameDelay = (): number => gameDelay;
 
 export type boardContent = {
     x: number;
@@ -90,7 +90,7 @@ const spawnNewBlock = (block: string): void => {
         case blocks.T_BLOCK:
             const T_POS = [{x: 0, y: 4}, {x: 1, y: 3}, {x: 1, y: 4}, {x: 1, y: 5}];
             isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== contentType.EMPTY && O_POS.some(p => p.x === e.x && p.y === e.y));
+                e.content !== contentType.EMPTY && T_POS.some(p => p.x === e.x && p.y === e.y));
             if(isPlaceOnBoard) {
                 setNewBlock(T_POS, contentType.T);
             }
@@ -99,7 +99,7 @@ const spawnNewBlock = (block: string): void => {
         case blocks.I_BLOCK:
             const I_POS = [{x: 0, y: 3}, {x: 0, y: 4}, {x: 0, y: 5}, {x: 0, y: 6}];
             isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== contentType.EMPTY && O_POS.some(p => p.x === e.x && p.y === e.y));
+                e.content !== contentType.EMPTY && I_POS.some(p => p.x === e.x && p.y === e.y));
             if(isPlaceOnBoard) {
                 setNewBlock(I_POS, contentType.I);
             }
@@ -145,27 +145,69 @@ const spawnNewBlock = (block: string): void => {
     }
 }
 
-const checkCollision = (movingBlock: boardContent[]): boolean => {
-    movingBlock.forEach(part => {
-        if(part.x === rows - 1)
-            return true;
+const checkDownCollision = (movingBlock: boardContent[]): boolean =>  checkCollision(movingBlock, 0, 0, 1);
 
-        const bottomField: boardContent = boardArray.find(e => e.y === part.y && e.x === part.x + 1 && !e.isMoving);
-        if(bottomField.content !== contentType.EMPTY)
-            return true;
-    });
+const checkRightCollision = (movingBlock: boardContent[]): boolean => checkCollision(movingBlock, 1);
 
+const checkLeftCollision = (movingBlock: boardContent[]): boolean => checkCollision(movingBlock, 0, 1);
+
+const checkCollision = (movingBlock?: boardContent[], right?: number, left?: number, down?: number, up?: number): boolean => {
+    for (let part of movingBlock) {
+        if (right && part.y === cols - 1) {
+            return true;
+        }
+
+        if (left && part.y === 0) {
+            return true;
+        }
+
+        if (up && part.x === 0) {
+            return true;
+        }
+
+        if (down && part.x === rows - 1) {
+            return true;
+        }
+
+        const collidingField = boardArray.find(e => 
+            e.y === part.y + (right ? right : 0) - (left ? left : 0) && 
+            e.x === part.x + (down ? down : 0) - (up ? up : 0) && 
+            !e.isMoving);
+        if (collidingField && collidingField.content !== contentType.EMPTY) {
+            return true;
+        }
+    }
     return false;
 }
 
-const blockFallDownLogic = () => {
-    if(checkCollision(boardArray.filter(e => e.isMoving))) {
+const moveBlockDown = () => {
+    let nextBlockPos: boardContent[] = [];
+    boardArray.filter(e => e.isMoving).forEach(e => {
+        nextBlockPos.push({x: e.x + 1, y: e.y, content: e.content, isMoving: true})
+        e.isMoving = false;
+        e.content = contentType.EMPTY;
+    });
 
-    }
+    boardArray.forEach(e => {
+        const nextBlock = nextBlockPos.find(b => b.x === e.x && b.y === e.y);
+        if(nextBlock) {
+            e.isMoving = true;
+            e.content = nextBlock.content;
+        }
+    });
 }
 
-const mainLoop = () => {
-    blockFallDownLogic();
+export const blockFallDownLogic = () => {
+    console.log("board array: ", boardArray.filter(e => e.isMoving));
+    if(checkDownCollision(boardArray.filter(e => e.isMoving))) {
+        boardArray.forEach(e => e.isMoving = false);
+        currentBlock = nextBlock;
+        spawnNewBlock(currentBlock);
+        nextBlock = getRandomBlock(currentBlock);
+        nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
+    } else {
+        moveBlockDown();
+    }
 }
 
 export const blockLogicInit = () => {
@@ -175,6 +217,4 @@ export const blockLogicInit = () => {
 
     nextBlock = getRandomBlock(currentBlock);
     nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
-
-    setInterval(mainLoop, gameDelay);
 }

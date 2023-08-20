@@ -1,4 +1,4 @@
-import { boardContent, blockLogicInit, getBoardArray, contentType } from "./blockLogic.js"; 
+import { boardContent, blockLogicInit, getBoardArray, contentType, getGameDelay, blockFallDownLogic } from "./blockLogic.js"; 
 
 const boardHTML = document.getElementsByClassName('board')[0];
 const scoreHTML = document.getElementsByClassName('score')[0];
@@ -77,10 +77,17 @@ const updateHTMLBoard = (): void => {
     
 }
 
+const mainLoop = () => {
+    blockFallDownLogic();
+    updateHTMLBoard();
+}
+
 const main = () => {
     initHTMLBoard();
     blockLogicInit();
     updateHTMLBoard();
+
+    setInterval(mainLoop, getGameDelay());
 }
 
 main();

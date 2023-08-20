@@ -1,4 +1,4 @@
-import { blockLogicInit, getBoardArray, contentType } from "./blockLogic.js";
+import { blockLogicInit, getBoardArray, contentType, getGameDelay, blockFallDownLogic } from "./blockLogic.js";
 const boardHTML = document.getElementsByClassName('board')[0];
 const scoreHTML = document.getElementsByClassName('score')[0];
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
@@ -60,10 +60,15 @@ const updateHTMLBoard = () => {
         }
     });
 };
+const mainLoop = () => {
+    blockFallDownLogic();
+    updateHTMLBoard();
+};
 const main = () => {
     initHTMLBoard();
     blockLogicInit();
     updateHTMLBoard();
+    setInterval(mainLoop, getGameDelay());
 };
 main();
 //# sourceMappingURL=script.js.map
