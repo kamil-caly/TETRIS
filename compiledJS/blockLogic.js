@@ -1,4 +1,4 @@
-import { blockContent, blocksType, direction } from "./types.js";
+import { blockContent, blocksType, direction, I_BLOCK_ROTATION_MAP } from "./types.js";
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
 const holdBlockHolderHTML = document.getElementById('hold_block_holder');
@@ -23,7 +23,7 @@ const getRandomBlock = (prevBlock) => {
         const blockValues = Object.values(blocksType);
         const randIndex = getRandomNumber(0, blockValues.length - 1);
         if (blockValues[randIndex] !== prevBlock || !prevBlock)
-            return blockValues[randIndex];
+            return { block: blockValues[randIndex], state: 0 };
     }
 };
 const spawnNewBlock = (block) => {
@@ -117,6 +117,62 @@ const checkCollision = (movingBlock, dir) => {
     }
     return false;
 };
+const checkRotateRightCollision = (movingBlock) => checkRotateCollision(movingBlock, currentBlock.state, (currentBlock.state + 1) % 4);
+const checkRotateCollision = (movingBlock, currentState, nextState) => {
+    const check_I_Collision = () => {
+        const getRotationKey = (fromState, toState) => `${fromState}_${toState}`;
+        const newBlockPos = movingBlock.map((block, i) => {
+            const offset = I_BLOCK_ROTATION_MAP[getRotationKey(currentState, nextState)][i];
+            return {
+                x: block.x + offset.x,
+                y: block.y + offset.y
+            };
+        });
+        if (newBlockPos.some(p => p.x >= rows || p.x <= 0 || p.y >= cols || p.y <= 0))
+            return true;
+        return boardArray.some(e => newBlockPos.some(p => p.x === e.x && p.y === e.y && e.content !== blockContent.EMPTY)
+            && !e.isMoving);
+    };
+    switch (currentBlock.block) {
+        case blocksType.I_BLOCK:
+            return check_I_Collision();
+        default:
+            break;
+    }
+};
+const rotateBlockLogic = (movingBlock, currentState, nextState) => {
+    const rotate = (rotationMap) => {
+        const getRotationKey = (fromState, toState) => `${fromState}_${toState}`;
+        const nextBlockPos = movingBlock.map((block, i) => {
+            const offset = rotationMap[getRotationKey(currentState, nextState)][i];
+            return {
+                x: block.x + offset.x,
+                y: block.y + offset.y,
+                content: block.content,
+                isMoving: true
+            };
+        });
+        movingBlock.forEach(e => {
+            e.content = blockContent.EMPTY,
+                e.isMoving = false;
+        });
+        boardArray.forEach(e => {
+            const nextBlock = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
+            if (nextBlock) {
+                e.isMoving = true;
+                e.content = nextBlock.content;
+            }
+        });
+        currentBlock.state = (currentBlock.state + 1) % 4;
+    };
+    switch (currentBlock.block) {
+        case blocksType.I_BLOCK:
+            rotate(I_BLOCK_ROTATION_MAP);
+            break;
+        default:
+            break;
+    }
+};
 const moveBlockLogic = (movingBlock, dir) => {
     let nextBlockPos = [];
     movingBlock.forEach(e => {
@@ -137,13 +193,13 @@ const moveBlockLogic = (movingBlock, dir) => {
     });
 };
 export const blockFallDownLogic = (movingBlock) => {
-    console.log("board array: ", boardArray.filter(e => e.isMoving));
+    //console.log("board array: ", boardArray.filter(e => e.isMoving));
     if (checkDownCollision(movingBlock)) {
         boardArray.forEach(e => e.isMoving = false);
         currentBlock = nextBlock;
-        spawnNewBlock(currentBlock);
-        nextBlock = getRandomBlock(currentBlock);
-        nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
+        spawnNewBlock(currentBlock.block);
+        nextBlock = getRandomBlock(currentBlock.block);
+        nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock.block}.png')`;
     }
     else {
         moveBlockLogic(movingBlock, direction.DOWN);
@@ -163,6 +219,9 @@ document.addEventListener('keydown', event => {
         case 'ArrowDown':
             !checkDownCollision(movingBlock) && moveBlockDown(movingBlock);
             break;
+        case 'ArrowUp':
+            !checkRotateRightCollision(movingBlock) && rotateBlockRight(movingBlock);
+            break;
         default:
             break;
     }
@@ -176,12 +235,15 @@ const moveBlockLeft = (movingBlock) => {
 const moveBlockDown = (movingBlock) => {
     blockFallDownLogic(movingBlock);
 };
+const rotateBlockRight = (movingBlock) => {
+    rotateBlockLogic(movingBlock, currentBlock.state, (currentBlock.state + 1) % 4);
+};
 // --------------------------------- Initial function --------------------------------- //
 export const blockLogicInit = () => {
     initBoard();
     currentBlock = getRandomBlock();
-    spawnNewBlock(currentBlock);
-    nextBlock = getRandomBlock(currentBlock);
-    nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock}.png')`;
+    spawnNewBlock(currentBlock.block);
+    nextBlock = getRandomBlock(currentBlock.block);
+    nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock.block}.png')`;
 };
 //# sourceMappingURL=blockLogic.js.map
