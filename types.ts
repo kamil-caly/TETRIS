@@ -33,7 +33,7 @@ export const direction = {
     UP: "UP"
 }
 
-export type currentBlockType = {
+export type blockType = {
     block: string,
     state: number 
 }
@@ -58,4 +58,66 @@ export const I_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: nu
     [BlockRotationStates.TWO_ONE]: [{ x: -2, y: 2 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }],
     [BlockRotationStates.THREE_TWO]: [{ x: 2, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 2 }],
     [BlockRotationStates.ZERO_THREE]: [{ x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: 2, y: -2 }],
+};
+
+export const J_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: number}[]> = {
+    [BlockRotationStates.ZERO_ONE]: [{ x: 0, y: 2 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }],
+    [BlockRotationStates.ONE_TWO]: [{ x: 1, y: 1 }, { x: 2, y: 0 }, { x: 0, y: 0 }, { x: -1, y: -1 }],
+    [BlockRotationStates.TWO_THREE]: [{ x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: 0, y: -2 }],
+    [BlockRotationStates.THREE_ZERO]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: -2, y: 0 }, { x: -1, y: -1 }],
+    [BlockRotationStates.ONE_ZERO]: [{ x: 1, y: -1 }, { x: 0, y: -2 }, { x: 0, y: 0 }, { x: -1, y: 1 }],
+    [BlockRotationStates.TWO_ONE]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: -2, y: 0 }],
+    [BlockRotationStates.THREE_TWO]: [{ x: 1, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 2 }, { x: -1, y: 1 }],
+    [BlockRotationStates.ZERO_THREE]: [{ x: 2, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }]
+};
+
+export const L_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: number}[]> = {
+    [BlockRotationStates.ZERO_ONE]: [{ x: 2, y: 0 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }],
+    [BlockRotationStates.ONE_TWO]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: 0, y: -2 }],
+    [BlockRotationStates.TWO_THREE]: [{ x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: -2, y: 0 }],
+    [BlockRotationStates.THREE_ZERO]: [{ x: 0, y: 2 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }],
+    [BlockRotationStates.ONE_ZERO]: [{ x: 1, y: -1 }, { x: 0, y: 0 }, { x: -1, y: 1 }, { x: -2, y: 0 }],
+    [BlockRotationStates.TWO_ONE]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: 0, y: 2 }],
+    [BlockRotationStates.THREE_TWO]: [{ x: 2, y: 0 }, { x: 1, y: -1 }, { x: 0, y: 0 }, { x: -1, y: 1 }],
+    [BlockRotationStates.ZERO_THREE]: [{ x: 0, y: -2 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }]
+};
+
+export const S_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: number}[]> = {
+    [BlockRotationStates.ZERO_ONE]: [{ x: 1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 2 }, { x: 0, y: 1 }],
+    [BlockRotationStates.ONE_TWO]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: 0, y: -2 }],
+    [BlockRotationStates.TWO_THREE]: [{ x: 0, y: 0 }, { x: 1, y: -1 }, { x: -2, y: 0 }, { x: -1, y: -1 }],
+    [BlockRotationStates.THREE_ZERO]: [{ x: 0, y: 2 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }],
+    [BlockRotationStates.ONE_ZERO]: [{ x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: -1, y: -2 }],
+    [BlockRotationStates.TWO_ONE]: [{ x: 0, y: 0 }, { x: -1, y: -1 }, { x: 0, y: 2 }, { x: -1, y: 1 }],
+    [BlockRotationStates.THREE_TWO]: [{ x: 1, y: 2 }, { x: 0, y: 1 }, { x: 1, y: 0 }, { x: 0, y: -1 }],
+    [BlockRotationStates.ZERO_THREE]: [{ x: 1, y: -1 }, { x: 0, y: -2 }, { x: 1, y: 1 }, { x: 0, y: 0 }]
+};
+
+export const Z_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: number}[]> = {
+    [BlockRotationStates.ZERO_ONE]: [{ x: 0, y: 2 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }],
+    [BlockRotationStates.ONE_TWO]: [{ x: 1, y: -2 }, { x: 1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 1 }],
+    [BlockRotationStates.TWO_THREE]: [{ x: -1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: 0, y: -2 }],
+    [BlockRotationStates.THREE_ZERO]: [{ x: 0, y: -1 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: -1, y: 2 }],
+    [BlockRotationStates.ONE_ZERO]: [{ x: 0, y: -2 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: -1, y: 1 }],
+    [BlockRotationStates.TWO_ONE]: [{ x: -1, y: 2 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }],
+    [BlockRotationStates.THREE_TWO]: [{ x: 1, y: -1 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: 0, y: 2 }],
+    [BlockRotationStates.ZERO_THREE]: [{ x: 0, y: 1 }, { x: 1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: -2 }]
+};
+
+export const T_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: number}[]> = {
+    [BlockRotationStates.ZERO_ONE]: [{ x: 1, y: 1 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }],
+
+    [BlockRotationStates.ONE_TWO]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: -1, y: -1 }],
+
+    [BlockRotationStates.TWO_THREE]: [{ x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: -1, y: -1 }],
+
+    [BlockRotationStates.THREE_ZERO]: [{ x: 1, y: 1 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }],
+
+    [BlockRotationStates.ONE_ZERO]: [{ x: 1, y: -1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: -1, y: 1 }],
+
+    [BlockRotationStates.TWO_ONE]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: -1, y: 1 }],
+
+    [BlockRotationStates.THREE_TWO]: [{ x: 1, y: -1 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: 1 }],
+
+    [BlockRotationStates.ZERO_THREE]: [{ x: 1, y: -1 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }]
 };

@@ -1,13 +1,13 @@
-import { boardContent, blockContent, blocksType, direction, currentBlockType, BlockRotationStates, I_BLOCK_ROTATION_MAP } from "./types.js";
+import { boardContent, blockContent, blocksType, direction, blockType, BlockRotationStates, I_BLOCK_ROTATION_MAP, J_BLOCK_ROTATION_MAP, L_BLOCK_ROTATION_MAP, S_BLOCK_ROTATION_MAP, Z_BLOCK_ROTATION_MAP, T_BLOCK_ROTATION_MAP } from "./types.js";
 
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
 
 const holdBlockHolderHTML = document.getElementById('hold_block_holder');
 const nextBlockHolderHTML = document.getElementById('next_block_holder');
-let nextBlock: currentBlockType, holdBlock, currentBlock: currentBlockType = null;
+let nextBlock: blockType, holdBlock, currentBlock: blockType = null;
 const boardArray: boardContent[] = [];
-let gameDelay: number = 300;
+let gameDelay: number = 1000;
 
 export const getBoardArray = (): boardContent[] => boardArray;
 
@@ -28,7 +28,7 @@ const getRandomNumber = (min: number = 0, max: number) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
 
-const getRandomBlock = (prevBlock?: string): currentBlockType => {
+const getRandomBlock = (prevBlock?: string): blockType => {
     while(true) {
         type BlockValuesType = typeof blocksType[keyof typeof blocksType];
         const blockValues = Object.values(blocksType) as BlockValuesType[];
@@ -119,6 +119,9 @@ const spawnNewBlock = (block: string): void => {
     }
 }
 
+const getRotationKey = (fromState: number, toState: number): BlockRotationStates => 
+             `${fromState}_${toState}` as BlockRotationStates;
+
 // --------------------------------- Collision Logic --------------------------------- //
 
 const checkDownCollision = (movingBlock: boardContent[]): boolean =>  checkCollision(movingBlock, direction.DOWN);
@@ -159,15 +162,18 @@ const checkCollision = (movingBlock: boardContent[], dir: string): boolean => {
 const checkRotateRightCollision = (movingBlock: boardContent[]): boolean =>
     checkRotateCollision(movingBlock, currentBlock.state, (currentBlock.state + 1) % 4);
 
+const checkRotateLeftCollision = (movingBlock: boardContent[]): boolean =>
+    checkRotateCollision(movingBlock, currentBlock.state, (currentBlock.state - 1 + 4) % 4);
+
 const checkRotateCollision = (movingBlock: boardContent[], currentState: number, nextState: number): boolean => {
     
-    const check_I_Collision = (): boolean => {
-
-        const getRotationKey = (fromState: number, toState: number): BlockRotationStates => 
-             `${fromState}_${toState}` as BlockRotationStates;
+    const checkCollision = (rotationMap: Record<BlockRotationStates, {
+        x: number;
+        y: number;
+    }[]>): boolean => {
     
         const newBlockPos = movingBlock.map((block, i) => {
-            const offset = I_BLOCK_ROTATION_MAP[
+            const offset = rotationMap[
                 getRotationKey(currentState, nextState)
             ][i];
             return {
@@ -176,22 +182,35 @@ const checkRotateCollision = (movingBlock: boardContent[], currentState: number,
             };
         });
 
-        if(newBlockPos.some(p => p.x >= rows || p.x <= 0 || p.y >= cols || p.y <= 0))
+        if(newBlockPos.some(p => p.x >= rows || p.x < 0 || p.y >= cols || p.y < 0))
             return true;
 
-        return boardArray.some(e => 
-            newBlockPos.some(p => 
-                p.x === e.x && p.y === e.y && e.content !== blockContent.EMPTY) 
-            && !e.isMoving);
+        return newBlockPos.some(p => 
+            boardArray.some(e => 
+                p.x === e.x && p.y === e.y && e.content !== blockContent.EMPTY && !e.isMoving
+            )
+        );
     }
 
     switch (currentBlock.block) {
         case blocksType.I_BLOCK:
-            return check_I_Collision();
+            return checkCollision(I_BLOCK_ROTATION_MAP);
+        case blocksType.J_BLOCK:
+            return checkCollision(J_BLOCK_ROTATION_MAP);
+        case blocksType.L_BLOCK: 
+            return checkCollision(L_BLOCK_ROTATION_MAP);
+        case blocksType.S_BLOCK: 
+            return checkCollision(S_BLOCK_ROTATION_MAP);
+        case blocksType.Z_BLOCK: 
+            return checkCollision(Z_BLOCK_ROTATION_MAP);
+        case blocksType.T_BLOCK: 
+            return checkCollision(T_BLOCK_ROTATION_MAP);
         default:
-            break;
+            return true;
     }
 }
+
+// --------------------------------- Rotate Block Logic --------------------------------- //
 
 const rotateBlockLogic = (movingBlock: boardContent[], currentState: number, nextState: number) => {
 
@@ -199,10 +218,6 @@ const rotateBlockLogic = (movingBlock: boardContent[], currentState: number, nex
         x: number;
         y: number;
     }[]>): void => {
-
-        const getRotationKey = (fromState: number, toState: number): BlockRotationStates => 
-            `${fromState}_${toState}` as BlockRotationStates;
-        
     
         const nextBlockPos: boardContent[] = movingBlock.map((block, i) => {
             const offset = rotationMap[
@@ -229,18 +244,34 @@ const rotateBlockLogic = (movingBlock: boardContent[], currentState: number, nex
             }
         });
 
-        currentBlock.state = (currentBlock.state + 1) % 4;
+        currentBlock.state = nextState;
     }
-    
 
     switch (currentBlock.block) {
         case blocksType.I_BLOCK: 
             rotate(I_BLOCK_ROTATION_MAP);
             break;
+        case blocksType.J_BLOCK: 
+            rotate(J_BLOCK_ROTATION_MAP);
+            break;
+        case blocksType.L_BLOCK: 
+            rotate(L_BLOCK_ROTATION_MAP);
+            break;
+        case blocksType.S_BLOCK: 
+            rotate(S_BLOCK_ROTATION_MAP);
+            break;
+        case blocksType.Z_BLOCK: 
+            rotate(Z_BLOCK_ROTATION_MAP);
+            break;
+        case blocksType.T_BLOCK: 
+            rotate(T_BLOCK_ROTATION_MAP);
+            break;
         default:
             break;
     }
 }
+
+// --------------------------------- Moving Block Logic --------------------------------- //
 
 const moveBlockLogic = (movingBlock: boardContent[], dir: string) => {
     let nextBlockPos: boardContent[] = [];
@@ -294,6 +325,9 @@ document.addEventListener('keydown', event => {
         case 'ArrowUp':
             !checkRotateRightCollision(movingBlock) && rotateBlockRight(movingBlock);
             break;
+        case 'z':
+            !checkRotateLeftCollision(movingBlock) && rotateBlockLeft(movingBlock);
+            break;
         default:
             break;
     }
@@ -313,6 +347,10 @@ const moveBlockDown = (movingBlock: boardContent[]) => {
 
 const rotateBlockRight = (movingBlock: boardContent[]) => {
     rotateBlockLogic(movingBlock, currentBlock.state, (currentBlock.state + 1) % 4);
+}
+
+const rotateBlockLeft = (movingBlock: boardContent[]) => {
+    rotateBlockLogic(movingBlock, currentBlock.state, (currentBlock.state - 1 + 4) % 4);
 }
 
 // --------------------------------- Initial function --------------------------------- //
