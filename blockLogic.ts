@@ -17,6 +17,8 @@ export const getBoardArray = (): boardContent[] => boardArray;
 export const getGameDelay = (): number => gameDelay;
 
 export const initBoard = (): boardContent[] => {
+    if(boardArray.length > 0)
+        boardArray.splice(0, boardArray.length);
     for(let x = 0; x < rows; x++) {
         for (let y = 0; y < cols; y++) {
             const field: boardContent = {x: x, y: y, content: blockContent.EMPTY, isMoving: false};
@@ -106,7 +108,7 @@ const spawnNewBlock = (block: string): void => {
             isPlaceOnBoard = !boardArray.some(e => 
                 e.content !== blockContent.EMPTY && S_POS.some(p => p.x === e.x && p.y === e.y));
             if(isPlaceOnBoard) {
-                setNewBlock(S_POS, blockContent.S, {x: 0, y: 5});
+                setNewBlock(S_POS, blockContent.S, {x: 1, y: 4});
             }
             break;
 
@@ -115,7 +117,7 @@ const spawnNewBlock = (block: string): void => {
             isPlaceOnBoard = !boardArray.some(e => 
                 e.content !== blockContent.EMPTY && Z_POS.some(p => p.x === e.x && p.y === e.y));
             if(isPlaceOnBoard) {
-                setNewBlock(Z_POS, blockContent.Z, {x: 1, y: 4});
+                setNewBlock(Z_POS, blockContent.Z, {x: 0, y: 4});
             }
             break;
         default:
@@ -240,19 +242,19 @@ const checkSwitchBlockCollision = (movingBlock: boardContent[]): boolean => {
 
     switch (holdBlock.block) {
         case blocksType.O_BLOCK:
-            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.O_BLOCK);
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.O_BLOCK);
         case blocksType.I_BLOCK:
-            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.I_BLOCK);
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.I_BLOCK);
         case blocksType.J_BLOCK:
-            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.J_BLOCK);
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.J_BLOCK);
         case blocksType.L_BLOCK:
-            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.L_BLOCK);
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.L_BLOCK);
         case blocksType.S_BLOCK:
-            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.S_BLOCK);
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.S_BLOCK);
         case blocksType.T_BLOCK:
-            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.T_BLOCK);
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.T_BLOCK);
         case blocksType.Z_BLOCK:
-            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.Z_BLOCK);
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.Z_BLOCK);
         default: 
             return true;
     }
@@ -275,13 +277,15 @@ const rotateBlockLogic = (movingBlock: boardContent[], currentState: number, nex
                 x: block.x + offset.x,
                 y: block.y + offset.y,
                 content: block.content,
-                isMoving: true
+                isMoving: true,
+                isCenterBlockPart: block.isCenterBlockPart
             };
         });
 
         movingBlock.forEach(e => {
             e.content = blockContent.EMPTY,
-            e.isMoving = false
+            e.isMoving = false,
+            e.isCenterBlockPart = false
         });
     
         boardArray.forEach(e => {
@@ -289,6 +293,7 @@ const rotateBlockLogic = (movingBlock: boardContent[], currentState: number, nex
             if(nextBlock) {
                 e.isMoving = true;
                 e.content = nextBlock.content;
+                e.isCenterBlockPart = nextBlock.isCenterBlockPart;
             }
         });
 
@@ -339,14 +344,15 @@ const moveBlockLogic = (movingBlock: boardContent[], dir: string) => {
     });
 
     boardArray.forEach(e => {
+        e.isCenterBlockPart && (e.isCenterBlockPart = false)
         const nextBlock: boardContent = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
         if(nextBlock) {
             e.isMoving = true;
             e.content = nextBlock.content;
             nextBlock.isCenterBlockPart && (e.isCenterBlockPart = true);
-            console.log('nextBlock: ', nextBlock);
         }
     });
+    console.log('boardArray: ', boardArray);
 }
 
 export const blockFallDownLogic = (movingBlock: boardContent[]) => {
@@ -360,6 +366,99 @@ export const blockFallDownLogic = (movingBlock: boardContent[]) => {
     } else {
         moveBlockLogic(movingBlock, direction.DOWN);
     }
+}
+
+// --------------------------------- Switch Block Logic --------------------------------- //
+
+const switchBlock = (movingBlock: boardContent[]): void => {
+
+    const removeMovingBlock = (): void => {
+        boardArray.forEach(e => {
+            if(e.isMoving) {
+                e.isMoving = false;
+                e.content = blockContent.EMPTY;
+                e.isCenterBlockPart = false;
+            }
+        })
+    }
+
+    if(!holdBlock) {
+        removeMovingBlock();
+        holdBlock = currentBlock;
+        holdBlock.state = 0;
+        holdBlockHolderHTML.style.backgroundImage = `url('./assets/${holdBlock.block}.png')`;
+        currentBlock = nextBlock;
+        spawnNewBlock(currentBlock.block);
+        nextBlock = getRandomBlock(currentBlock.block);
+        nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock.block}.png')`;
+        return;
+    }
+    
+    const newCurrentBlock: blockType = holdBlock;
+    holdBlock = currentBlock;
+    holdBlock.state = 0;
+    holdBlockHolderHTML.style.backgroundImage = `url('./assets/${currentBlock.block}.png')`;
+    currentBlock = newCurrentBlock;
+    currentBlock.state = 0;
+    const centerBlockPart = movingBlock.find(b => b.isCenterBlockPart);
+
+    const switchOBlock = (pos: Coordinates[], blockCon: string): void => {
+        let newBlock: boardContent[] = [];
+        for(let p of pos) {
+            const newBlockContent: boardContent = {
+                x: centerBlockPart.x + p.x,
+                y: centerBlockPart.y + p.y,
+                isMoving: true,
+                content: blockCon
+            }
+            p.x === 0 && p.y === 0 && (newBlockContent.isCenterBlockPart = true);
+            newBlock.push(newBlockContent);
+        }
+
+        boardArray.forEach(e => {
+            if(e.isMoving) {
+                e.isMoving = false;
+                e.content = blockContent.EMPTY;
+                e.isCenterBlockPart && (e.isCenterBlockPart = false)
+            }
+        })
+
+        boardArray.forEach(e => {
+            const currentNewBlockPart = newBlock.find(b => b.x === e.x && b.y === e.y)
+            if(currentNewBlockPart) {
+                e.content = newBlock[0].content;
+                e.isMoving = true;
+                currentNewBlockPart.isCenterBlockPart && (e.isCenterBlockPart = true)
+            }
+        })
+
+    }
+
+    switch (currentBlock.block) {
+        case blocksType.O_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.O_BLOCK, blockContent.O);
+            break;
+        case blocksType.I_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.I_BLOCK, blockContent.I);
+            break;
+        case blocksType.J_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.J_BLOCK, blockContent.J);
+            break;
+        case blocksType.L_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.L_BLOCK, blockContent.L);
+            break;
+        case blocksType.S_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.S_BLOCK, blockContent.S);
+            break;
+        case blocksType.T_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.T_BLOCK, blockContent.T);
+            break;
+        case blocksType.Z_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.Z_BLOCK, blockContent.Z);
+            break;
+        default: 
+            break;
+    }    
 }
 
 // --------------------------------- Player's Moves --------------------------------- //
@@ -384,7 +483,7 @@ document.addEventListener('keydown', event => {
             !checkRotateLeftCollision(movingBlock) && rotateBlockLeft(movingBlock);
             break;
         case 'c':
-            !checkSwitchBlockCollision(movingBlock); //&& switchBlock(movingBlock);
+            !checkSwitchBlockCollision(movingBlock) && switchBlock(movingBlock);
             break;
         default:
             break;

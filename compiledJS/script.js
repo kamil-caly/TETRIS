@@ -4,7 +4,7 @@ const boardHTML = document.getElementsByClassName('board')[0];
 const scoreHTML = document.getElementsByClassName('score')[0];
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
-const REFRESH_BOARD_DELAY = 5;
+const REFRESH_BOARD_DELAY = 10;
 const initHTMLBoard = () => {
     for (let x = 0; x < rows; x++) {
         for (let y = 0; y < cols; y++) {

@@ -1,4 +1,4 @@
-import { blockContent, blocksType, direction, I_BLOCK_ROTATION_MAP, J_BLOCK_ROTATION_MAP, L_BLOCK_ROTATION_MAP, S_BLOCK_ROTATION_MAP, Z_BLOCK_ROTATION_MAP, T_BLOCK_ROTATION_MAP } from "./types.js";
+import { blockContent, blocksType, direction, I_BLOCK_ROTATION_MAP, J_BLOCK_ROTATION_MAP, L_BLOCK_ROTATION_MAP, S_BLOCK_ROTATION_MAP, Z_BLOCK_ROTATION_MAP, T_BLOCK_ROTATION_MAP, BLOCK_SWITCH_MAP } from "./types.js";
 const cols = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-cols'));
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
 const holdBlockHolderHTML = document.getElementById('hold_block_holder');
@@ -9,6 +9,8 @@ let gameDelay = 1000;
 export const getBoardArray = () => boardArray;
 export const getGameDelay = () => gameDelay;
 export const initBoard = () => {
+    if (boardArray.length > 0)
+        boardArray.splice(0, boardArray.length);
     for (let x = 0; x < rows; x++) {
         for (let y = 0; y < cols; y++) {
             const field = { x: x, y: y, content: blockContent.EMPTY, isMoving: false };
@@ -77,14 +79,14 @@ const spawnNewBlock = (block) => {
             const S_POS = [{ x: 1, y: 3 }, { x: 1, y: 4 }, { x: 0, y: 4 }, { x: 0, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && S_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(S_POS, blockContent.S, { x: 0, y: 5 });
+                setNewBlock(S_POS, blockContent.S, { x: 1, y: 4 });
             }
             break;
         case blocksType.Z_BLOCK:
             const Z_POS = [{ x: 0, y: 3 }, { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 1, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && Z_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(Z_POS, blockContent.Z, { x: 1, y: 4 });
+                setNewBlock(Z_POS, blockContent.Z, { x: 0, y: 4 });
             }
             break;
         default:
@@ -152,7 +154,42 @@ const checkRotateCollision = (movingBlock, currentState, nextState) => {
     }
 };
 const checkSwitchBlockCollision = (movingBlock) => {
-    return true;
+    if (!holdBlock)
+        return false;
+    const checkSwitchBlockCollision = (pos) => {
+        const centerMovingBlockPart = movingBlock.find(b => b.isCenterBlockPart);
+        if (!centerMovingBlockPart)
+            return false;
+        for (let p of pos) {
+            const newX = centerMovingBlockPart.x + p.x;
+            const newY = centerMovingBlockPart.y + p.y;
+            if (!movingBlock.some(e => e.x === newX && e.y === newY)) {
+                const boardNewElem = boardArray.find(e => e.x === newX && e.y === newY && e.content === blockContent.EMPTY);
+                if (!boardNewElem) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+    switch (holdBlock.block) {
+        case blocksType.O_BLOCK:
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.O_BLOCK);
+        case blocksType.I_BLOCK:
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.I_BLOCK);
+        case blocksType.J_BLOCK:
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.J_BLOCK);
+        case blocksType.L_BLOCK:
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.L_BLOCK);
+        case blocksType.S_BLOCK:
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.S_BLOCK);
+        case blocksType.T_BLOCK:
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.T_BLOCK);
+        case blocksType.Z_BLOCK:
+            return checkSwitchBlockCollision(BLOCK_SWITCH_MAP.Z_BLOCK);
+        default:
+            return true;
+    }
 };
 // --------------------------------- Rotate Block Logic --------------------------------- //
 const rotateBlockLogic = (movingBlock, currentState, nextState) => {
@@ -163,18 +200,21 @@ const rotateBlockLogic = (movingBlock, currentState, nextState) => {
                 x: block.x + offset.x,
                 y: block.y + offset.y,
                 content: block.content,
-                isMoving: true
+                isMoving: true,
+                isCenterBlockPart: block.isCenterBlockPart
             };
         });
         movingBlock.forEach(e => {
             e.content = blockContent.EMPTY,
-                e.isMoving = false;
+                e.isMoving = false,
+                e.isCenterBlockPart = false;
         });
         boardArray.forEach(e => {
             const nextBlock = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
             if (nextBlock) {
                 e.isMoving = true;
                 e.content = nextBlock.content;
+                e.isCenterBlockPart = nextBlock.isCenterBlockPart;
             }
         });
         currentBlock.state = nextState;
@@ -219,14 +259,15 @@ const moveBlockLogic = (movingBlock, dir) => {
         e.content = blockContent.EMPTY;
     });
     boardArray.forEach(e => {
+        e.isCenterBlockPart && (e.isCenterBlockPart = false);
         const nextBlock = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
         if (nextBlock) {
             e.isMoving = true;
             e.content = nextBlock.content;
             nextBlock.isCenterBlockPart && (e.isCenterBlockPart = true);
-            console.log('nextBlock: ', nextBlock);
         }
     });
+    console.log('boardArray: ', boardArray);
 };
 export const blockFallDownLogic = (movingBlock) => {
     //console.log("board array: ", boardArray.filter(e => e.isMoving));
@@ -239,6 +280,89 @@ export const blockFallDownLogic = (movingBlock) => {
     }
     else {
         moveBlockLogic(movingBlock, direction.DOWN);
+    }
+};
+// --------------------------------- Switch Block Logic --------------------------------- //
+const switchBlock = (movingBlock) => {
+    const removeMovingBlock = () => {
+        boardArray.forEach(e => {
+            if (e.isMoving) {
+                e.isMoving = false;
+                e.content = blockContent.EMPTY;
+                e.isCenterBlockPart = false;
+            }
+        });
+    };
+    if (!holdBlock) {
+        removeMovingBlock();
+        holdBlock = currentBlock;
+        holdBlock.state = 0;
+        holdBlockHolderHTML.style.backgroundImage = `url('./assets/${holdBlock.block}.png')`;
+        currentBlock = nextBlock;
+        spawnNewBlock(currentBlock.block);
+        nextBlock = getRandomBlock(currentBlock.block);
+        nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock.block}.png')`;
+        return;
+    }
+    const newCurrentBlock = holdBlock;
+    holdBlock = currentBlock;
+    holdBlock.state = 0;
+    holdBlockHolderHTML.style.backgroundImage = `url('./assets/${currentBlock.block}.png')`;
+    currentBlock = newCurrentBlock;
+    currentBlock.state = 0;
+    const centerBlockPart = movingBlock.find(b => b.isCenterBlockPart);
+    const switchOBlock = (pos, blockCon) => {
+        let newBlock = [];
+        for (let p of pos) {
+            const newBlockContent = {
+                x: centerBlockPart.x + p.x,
+                y: centerBlockPart.y + p.y,
+                isMoving: true,
+                content: blockCon
+            };
+            p.x === 0 && p.y === 0 && (newBlockContent.isCenterBlockPart = true);
+            newBlock.push(newBlockContent);
+        }
+        boardArray.forEach(e => {
+            if (e.isMoving) {
+                e.isMoving = false;
+                e.content = blockContent.EMPTY;
+                e.isCenterBlockPart && (e.isCenterBlockPart = false);
+            }
+        });
+        boardArray.forEach(e => {
+            const currentNewBlockPart = newBlock.find(b => b.x === e.x && b.y === e.y);
+            if (currentNewBlockPart) {
+                e.content = newBlock[0].content;
+                e.isMoving = true;
+                currentNewBlockPart.isCenterBlockPart && (e.isCenterBlockPart = true);
+            }
+        });
+    };
+    switch (currentBlock.block) {
+        case blocksType.O_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.O_BLOCK, blockContent.O);
+            break;
+        case blocksType.I_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.I_BLOCK, blockContent.I);
+            break;
+        case blocksType.J_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.J_BLOCK, blockContent.J);
+            break;
+        case blocksType.L_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.L_BLOCK, blockContent.L);
+            break;
+        case blocksType.S_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.S_BLOCK, blockContent.S);
+            break;
+        case blocksType.T_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.T_BLOCK, blockContent.T);
+            break;
+        case blocksType.Z_BLOCK:
+            switchOBlock(BLOCK_SWITCH_MAP.Z_BLOCK, blockContent.Z);
+            break;
+        default:
+            break;
     }
 };
 // --------------------------------- Player's Moves --------------------------------- //
@@ -262,7 +386,7 @@ document.addEventListener('keydown', event => {
             !checkRotateLeftCollision(movingBlock) && rotateBlockLeft(movingBlock);
             break;
         case 'c':
-            !checkSwitchBlockCollision(movingBlock); //&& switchBlock(movingBlock);
+            !checkSwitchBlockCollision(movingBlock) && switchBlock(movingBlock);
             break;
         default:
             break;
