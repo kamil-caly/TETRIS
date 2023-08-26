@@ -3,6 +3,12 @@ export type boardContent = {
     y: number;
     content: string | null; // contentType
     isMoving: boolean;
+    isCenterBlockPart?: boolean;
+}
+
+export type Coordinates = {
+    x: number;
+    y: number;
 }
 
 export const blockContent = {
@@ -106,18 +112,22 @@ export const Z_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: nu
 
 export const T_BLOCK_ROTATION_MAP: Record<BlockRotationStates, {x: number, y: number}[]> = {
     [BlockRotationStates.ZERO_ONE]: [{ x: 1, y: 1 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }],
-
     [BlockRotationStates.ONE_TWO]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: -1, y: -1 }],
-
     [BlockRotationStates.TWO_THREE]: [{ x: -1, y: 1 }, { x: 0, y: 0 }, { x: 1, y: -1 }, { x: -1, y: -1 }],
-
     [BlockRotationStates.THREE_ZERO]: [{ x: 1, y: 1 }, { x: -1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }],
-
     [BlockRotationStates.ONE_ZERO]: [{ x: 1, y: -1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: -1, y: 1 }],
-
     [BlockRotationStates.TWO_ONE]: [{ x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }, { x: -1, y: 1 }],
-
     [BlockRotationStates.THREE_TWO]: [{ x: 1, y: -1 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: 1 }],
-
     [BlockRotationStates.ZERO_THREE]: [{ x: 1, y: -1 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }]
 };
+
+export const BLOCK_SWITCH_MAP: Record<string, {x: number, y: number}[]> = {
+    I_BLOCK: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }],
+    J_BLOCK: [{ x: -1, y: -1 }, { x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+    L_BLOCK: [{ x: -1, y: 1 }, { x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+    O_BLOCK: [{ x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
+    S_BLOCK: [{ x: -1, y: 0 }, { x: -1, y: 1 }, { x: 0, y: -1 }, { x: 0, y: 0 }],
+    Z_BLOCK: [{ x: -1, y: -1 }, { x: -1, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+    T_BLOCK: [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+};
+

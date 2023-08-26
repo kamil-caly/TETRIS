@@ -94,4 +94,13 @@ export const T_BLOCK_ROTATION_MAP = {
     [BlockRotationStates.THREE_TWO]: [{ x: 1, y: -1 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: 1 }],
     [BlockRotationStates.ZERO_THREE]: [{ x: 1, y: -1 }, { x: 1, y: 1 }, { x: 0, y: 0 }, { x: -1, y: -1 }]
 };
+export const BLOCK_SWITCH_MAP = {
+    I_BLOCK: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }],
+    J_BLOCK: [{ x: -1, y: -1 }, { x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+    L_BLOCK: [{ x: -1, y: 1 }, { x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+    O_BLOCK: [{ x: 0, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
+    S_BLOCK: [{ x: -1, y: 0 }, { x: -1, y: 1 }, { x: 0, y: -1 }, { x: 0, y: 0 }],
+    Z_BLOCK: [{ x: -1, y: -1 }, { x: -1, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+    T_BLOCK: [{ x: -1, y: 0 }, { x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }],
+};
 //# sourceMappingURL=types.js.map

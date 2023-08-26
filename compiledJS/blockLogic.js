@@ -27,11 +27,12 @@ const getRandomBlock = (prevBlock) => {
     }
 };
 const spawnNewBlock = (block) => {
-    const setNewBlock = (blockPos, content) => {
+    const setNewBlock = (blockPos, content, centerBlockPart) => {
         boardArray.forEach(e => {
             if (blockPos.some(p => p.x === e.x && p.y === e.y)) {
                 e.content = content;
                 e.isMoving = true;
+                e.x === centerBlockPart.x && e.y === centerBlockPart.y && (e.isCenterBlockPart = true);
             }
         });
     };
@@ -41,49 +42,49 @@ const spawnNewBlock = (block) => {
             const O_POS = [{ x: 0, y: 4 }, { x: 0, y: 5 }, { x: 1, y: 4 }, { x: 1, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && O_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(O_POS, blockContent.O);
+                setNewBlock(O_POS, blockContent.O, { x: 0, y: 4 });
             }
             break;
         case blocksType.T_BLOCK:
             const T_POS = [{ x: 0, y: 4 }, { x: 1, y: 3 }, { x: 1, y: 4 }, { x: 1, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && T_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(T_POS, blockContent.T);
+                setNewBlock(T_POS, blockContent.T, { x: 1, y: 4 });
             }
             break;
         case blocksType.I_BLOCK:
             const I_POS = [{ x: 0, y: 3 }, { x: 0, y: 4 }, { x: 0, y: 5 }, { x: 0, y: 6 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && I_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(I_POS, blockContent.I);
+                setNewBlock(I_POS, blockContent.I, { x: 0, y: 4 });
             }
             break;
         case blocksType.J_BLOCK:
             const J_POS = [{ x: 0, y: 3 }, { x: 1, y: 3 }, { x: 1, y: 4 }, { x: 1, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && J_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(J_POS, blockContent.J);
+                setNewBlock(J_POS, blockContent.J, { x: 1, y: 4 });
             }
             break;
         case blocksType.L_BLOCK:
             const L_POS = [{ x: 0, y: 5 }, { x: 1, y: 3 }, { x: 1, y: 4 }, { x: 1, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && L_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(L_POS, blockContent.L);
+                setNewBlock(L_POS, blockContent.L, { x: 1, y: 4 });
             }
             break;
         case blocksType.S_BLOCK:
             const S_POS = [{ x: 1, y: 3 }, { x: 1, y: 4 }, { x: 0, y: 4 }, { x: 0, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && S_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(S_POS, blockContent.S);
+                setNewBlock(S_POS, blockContent.S, { x: 0, y: 5 });
             }
             break;
         case blocksType.Z_BLOCK:
             const Z_POS = [{ x: 0, y: 3 }, { x: 0, y: 4 }, { x: 1, y: 4 }, { x: 1, y: 5 }];
             isPlaceOnBoard = !boardArray.some(e => e.content !== blockContent.EMPTY && Z_POS.some(p => p.x === e.x && p.y === e.y));
             if (isPlaceOnBoard) {
-                setNewBlock(Z_POS, blockContent.Z);
+                setNewBlock(Z_POS, blockContent.Z, { x: 1, y: 4 });
             }
             break;
         default:
@@ -150,6 +151,9 @@ const checkRotateCollision = (movingBlock, currentState, nextState) => {
             return true;
     }
 };
+const checkSwitchBlockCollision = (movingBlock) => {
+    return true;
+};
 // --------------------------------- Rotate Block Logic --------------------------------- //
 const rotateBlockLogic = (movingBlock, currentState, nextState) => {
     const rotate = (rotationMap) => {
@@ -202,11 +206,15 @@ const rotateBlockLogic = (movingBlock, currentState, nextState) => {
 const moveBlockLogic = (movingBlock, dir) => {
     let nextBlockPos = [];
     movingBlock.forEach(e => {
-        nextBlockPos.push({
+        let newBlockContent = {
             x: e.x + (dir === direction.DOWN ? 1 : 0),
             y: e.y + (dir === direction.RIGHT ? 1 : 0) - (dir === direction.LEFT ? 1 : 0),
-            content: e.content, isMoving: true
-        });
+            content: e.content,
+            isMoving: true
+        };
+        if (e.isCenterBlockPart)
+            newBlockContent.isCenterBlockPart = true;
+        nextBlockPos.push(newBlockContent);
         e.isMoving = false;
         e.content = blockContent.EMPTY;
     });
@@ -215,6 +223,8 @@ const moveBlockLogic = (movingBlock, dir) => {
         if (nextBlock) {
             e.isMoving = true;
             e.content = nextBlock.content;
+            nextBlock.isCenterBlockPart && (e.isCenterBlockPart = true);
+            console.log('nextBlock: ', nextBlock);
         }
     });
 };
@@ -250,6 +260,9 @@ document.addEventListener('keydown', event => {
             break;
         case 'z':
             !checkRotateLeftCollision(movingBlock) && rotateBlockLeft(movingBlock);
+            break;
+        case 'c':
+            !checkSwitchBlockCollision(movingBlock); //&& switchBlock(movingBlock);
             break;
         default:
             break;
