@@ -241,6 +241,18 @@ const checkSwitchBlockCollision = (movingBlock: boardContent[]): boolean => {
     switch (holdBlock.block) {
         case blocksType.O_BLOCK:
             checkSwitchBlockCollision(BLOCK_SWITCH_MAP.O_BLOCK);
+        case blocksType.I_BLOCK:
+            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.I_BLOCK);
+        case blocksType.J_BLOCK:
+            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.J_BLOCK);
+        case blocksType.L_BLOCK:
+            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.L_BLOCK);
+        case blocksType.S_BLOCK:
+            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.S_BLOCK);
+        case blocksType.T_BLOCK:
+            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.T_BLOCK);
+        case blocksType.Z_BLOCK:
+            checkSwitchBlockCollision(BLOCK_SWITCH_MAP.Z_BLOCK);
         default: 
             return true;
     }
