@@ -273,6 +273,7 @@ export const blockFallDownLogic = (movingBlock) => {
     //console.log("board array: ", boardArray.filter(e => e.isMoving));
     if (checkDownCollision(movingBlock)) {
         boardArray.forEach(e => e.isMoving = false);
+        deleteFullRowsLogic();
         currentBlock = nextBlock;
         spawnNewBlock(currentBlock.block);
         nextBlock = getRandomBlock(currentBlock.block);
@@ -280,6 +281,30 @@ export const blockFallDownLogic = (movingBlock) => {
     }
     else {
         moveBlockLogic(movingBlock, direction.DOWN);
+    }
+};
+// --------------------------------- Deleting Rows Logic --------------------------------- //
+const deleteFullRow = (row) => {
+    boardArray.forEach(e => {
+        if (e.x === row)
+            e.content = blockContent.EMPTY;
+    });
+};
+const movesAllBlocksOneStepDown = (startRow) => {
+    for (let x = startRow; x >= 0; x--) {
+        const currentRow = boardArray.filter(e => e.x === x);
+        boardArray.filter(e => e.x === x + 1).forEach((ee, index) => ee.content = currentRow[index].content);
+    }
+    boardArray.filter(e => e.x === 0).forEach(ee => ee.content = blockContent.EMPTY);
+};
+const deleteFullRowsLogic = () => {
+    for (let x = rows - 1; x >= 0; x--) {
+        const row = boardArray.filter(e => e.x === x);
+        if (row.some(e => e.content === blockContent.EMPTY))
+            continue;
+        deleteFullRow(x);
+        movesAllBlocksOneStepDown(x - 1);
+        x++; //again check the same row because blocks has been moved down
     }
 };
 // --------------------------------- Switch Block Logic --------------------------------- //
@@ -377,7 +402,7 @@ document.addEventListener('keydown', event => {
             !checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
             break;
         case 'ArrowDown':
-            !checkDownCollision(movingBlock) && moveBlockDown(movingBlock);
+            moveBlockDown(movingBlock); // checking collision is in blockFallDownLogic
             break;
         case 'ArrowUp':
             !checkRotateRightCollision(movingBlock) && rotateBlockRight(movingBlock);

@@ -359,12 +359,43 @@ export const blockFallDownLogic = (movingBlock: boardContent[]) => {
     //console.log("board array: ", boardArray.filter(e => e.isMoving));
     if(checkDownCollision(movingBlock)) {
         boardArray.forEach(e => e.isMoving = false);
+        deleteFullRowsLogic();
         currentBlock = nextBlock;
         spawnNewBlock(currentBlock.block);
         nextBlock = getRandomBlock(currentBlock.block);
         nextBlockHolderHTML.style.backgroundImage = `url('./assets/${nextBlock.block}.png')`;
     } else {
         moveBlockLogic(movingBlock, direction.DOWN);
+    }
+}
+
+// --------------------------------- Deleting Rows Logic --------------------------------- //
+
+const deleteFullRow = (row: number): void => {
+    boardArray.forEach(e => {
+        if(e.x === row) 
+            e.content = blockContent.EMPTY;
+    })
+}
+
+const movesAllBlocksOneStepDown = (startRow: number): void => {
+    for(let x = startRow; x >= 0; x--) {
+        const currentRow: boardContent[] = boardArray.filter(e => e.x === x);
+        boardArray.filter(e => e.x === x + 1).forEach((ee, index) => ee.content = currentRow[index].content);
+    }
+
+    boardArray.filter(e => e.x === 0).forEach(ee => ee.content = blockContent.EMPTY);
+}
+
+const deleteFullRowsLogic = (): void => {
+    for(let x = rows - 1; x >= 0; x--) {
+        const row: boardContent[] = boardArray.filter(e => e.x === x)
+        if(row.some(e => e.content === blockContent.EMPTY))
+            continue;
+
+        deleteFullRow(x);
+        movesAllBlocksOneStepDown(x - 1);
+        x++ //again check the same row because blocks has been moved down
     }
 }
 
@@ -474,7 +505,7 @@ document.addEventListener('keydown', event => {
             !checkLeftCollision(movingBlock) && moveBlockLeft(movingBlock);
             break;
         case 'ArrowDown':
-            !checkDownCollision(movingBlock) && moveBlockDown(movingBlock);
+            moveBlockDown(movingBlock); // checking collision is in blockFallDownLogic
             break;
         case 'ArrowUp':
             !checkRotateRightCollision(movingBlock) && rotateBlockRight(movingBlock);
