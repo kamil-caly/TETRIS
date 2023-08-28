@@ -5,15 +5,17 @@ const holdBlockHolderHTML = document.getElementById('hold_block_holder');
 const nextBlockHolderHTML = document.getElementById('next_block_holder');
 let nextBlock, holdBlock, currentBlock = null;
 const boardArray = [];
-let gameDelay = 1000;
+let GAME_DELAY = 800;
+let GAME_POINTS = 0;
 export const getBoardArray = () => boardArray;
-export const getGameDelay = () => gameDelay;
+export const getGameDelay = () => GAME_DELAY;
+export const getGamePoints = () => GAME_POINTS;
 export const initBoard = () => {
     if (boardArray.length > 0)
         boardArray.splice(0, boardArray.length);
     for (let x = 0; x < rows; x++) {
         for (let y = 0; y < cols; y++) {
-            const field = { x: x, y: y, content: blockContent.EMPTY, isMoving: false };
+            const field = { x: x, y: y, content: blockContent.EMPTY, isMoving: false, isShadow: false };
             boardArray.push(field);
         }
     }
@@ -28,6 +30,41 @@ const getRandomBlock = (prevBlock) => {
             return { block: blockValues[randIndex], state: 0 };
     }
 };
+const clearShadow = () => {
+    boardArray.filter(e => e.isShadow).forEach(ee => {
+        ee.isShadow = false;
+        ee.content = blockContent.EMPTY;
+        ee.isCenterBlockPart = false;
+    });
+};
+const setAndUpdateShadowOnTheFloor = () => {
+    clearShadow();
+    const shadowBlockFallDownLogic = (movingBlock) => {
+        if (checkDownCollision(movingBlock) || movingBlock.length <= 0) {
+            boardArray.filter(e => e.isShadow).forEach(ee => ee.isMoving = false);
+            return true;
+        }
+        else {
+            moveBlockLogic(movingBlock, direction.DOWN, true);
+        }
+    };
+    let movingBlockTempPosition = [];
+    boardArray.filter(e => e.isMoving).forEach(ee => movingBlockTempPosition.push(Object.assign({}, ee)));
+    while (true) {
+        if (shadowBlockFallDownLogic(boardArray.filter(e => e.isMoving)))
+            break;
+    }
+    for (let e of boardArray) {
+        for (let ee of movingBlockTempPosition) {
+            if (e.x === ee.x && e.y === ee.y) {
+                e.content = ee.content;
+                e.isCenterBlockPart = ee.isCenterBlockPart;
+                e.isMoving = true;
+                e.isShadow = false;
+            }
+        }
+    }
+};
 const spawnNewBlock = (block) => {
     const setNewBlock = (blockPos, content, centerBlockPart) => {
         boardArray.forEach(e => {
@@ -35,6 +72,7 @@ const spawnNewBlock = (block) => {
                 e.content = content;
                 e.isMoving = true;
                 e.x === centerBlockPart.x && e.y === centerBlockPart.y && (e.isCenterBlockPart = true);
+                e.isShadow = false;
             }
         });
     };
@@ -92,7 +130,10 @@ const spawnNewBlock = (block) => {
         default:
             break;
     }
+    setAndUpdateShadowOnTheFloor();
 };
+const updatePoints = () => GAME_POINTS++;
+const updateGameDelay = () => GAME_DELAY > 500 ? GAME_DELAY -= 7 : GAME_DELAY -= 10;
 const getRotationKey = (fromState, toState) => `${fromState}_${toState}`;
 // --------------------------------- Collision Logic --------------------------------- //
 const checkDownCollision = (movingBlock) => checkCollision(movingBlock, direction.DOWN);
@@ -115,7 +156,7 @@ const checkCollision = (movingBlock, dir) => {
         const collidingField = boardArray.find(e => e.y === part.y + (dir === direction.RIGHT ? 1 : 0) - (dir === direction.LEFT ? 1 : 0) &&
             e.x === part.x + (dir === direction.DOWN ? 1 : 0) - (dir === direction.UP ? 1 : 0) &&
             !e.isMoving);
-        if (collidingField && collidingField.content !== blockContent.EMPTY) {
+        if (collidingField && (collidingField.content !== blockContent.EMPTY && !collidingField.isShadow)) {
             return true;
         }
     }
@@ -134,7 +175,9 @@ const checkRotateCollision = (movingBlock, currentState, nextState) => {
         });
         if (newBlockPos.some(p => p.x >= rows || p.x < 0 || p.y >= cols || p.y < 0))
             return true;
-        return newBlockPos.some(p => boardArray.some(e => p.x === e.x && p.y === e.y && e.content !== blockContent.EMPTY && !e.isMoving));
+        return newBlockPos.some(p => boardArray.some(e => p.x === e.x && p.y === e.y &&
+            (e.content !== blockContent.EMPTY && !e.isShadow) &&
+            !e.isMoving));
     };
     switch (currentBlock.block) {
         case blocksType.I_BLOCK:
@@ -201,13 +244,15 @@ const rotateBlockLogic = (movingBlock, currentState, nextState) => {
                 y: block.y + offset.y,
                 content: block.content,
                 isMoving: true,
-                isCenterBlockPart: block.isCenterBlockPart
+                isCenterBlockPart: block.isCenterBlockPart,
+                isShadow: false
             };
         });
         movingBlock.forEach(e => {
             e.content = blockContent.EMPTY,
                 e.isMoving = false,
-                e.isCenterBlockPart = false;
+                e.isCenterBlockPart = false,
+                e.isShadow = false;
         });
         boardArray.forEach(e => {
             const nextBlock = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
@@ -215,6 +260,7 @@ const rotateBlockLogic = (movingBlock, currentState, nextState) => {
                 e.isMoving = true;
                 e.content = nextBlock.content;
                 e.isCenterBlockPart = nextBlock.isCenterBlockPart;
+                e.isShadow = false;
             }
         });
         currentBlock.state = nextState;
@@ -243,36 +289,37 @@ const rotateBlockLogic = (movingBlock, currentState, nextState) => {
     }
 };
 // --------------------------------- Moving Block Logic --------------------------------- //
-const moveBlockLogic = (movingBlock, dir) => {
+const moveBlockLogic = (movingBlock, dir, isShadow = false) => {
     let nextBlockPos = [];
     movingBlock.forEach(e => {
         let newBlockContent = {
             x: e.x + (dir === direction.DOWN ? 1 : 0),
             y: e.y + (dir === direction.RIGHT ? 1 : 0) - (dir === direction.LEFT ? 1 : 0),
             content: e.content,
-            isMoving: true
+            isMoving: true,
+            isShadow: isShadow
         };
         if (e.isCenterBlockPart)
             newBlockContent.isCenterBlockPart = true;
         nextBlockPos.push(newBlockContent);
         e.isMoving = false;
         e.content = blockContent.EMPTY;
+        e.isShadow = false;
     });
     boardArray.forEach(e => {
         e.isCenterBlockPart && (e.isCenterBlockPart = false);
         const nextBlock = nextBlockPos.find(p => p.x === e.x && p.y === e.y);
         if (nextBlock) {
             e.isMoving = true;
+            e.isShadow = isShadow;
             e.content = nextBlock.content;
             nextBlock.isCenterBlockPart && (e.isCenterBlockPart = true);
         }
     });
-    console.log('boardArray: ', boardArray);
 };
 export const blockFallDownLogic = (movingBlock) => {
-    //console.log("board array: ", boardArray.filter(e => e.isMoving));
     if (checkDownCollision(movingBlock)) {
-        boardArray.forEach(e => e.isMoving = false);
+        boardArray.forEach(e => { e.isMoving = false, e.isShadow = false; });
         deleteFullRowsLogic();
         currentBlock = nextBlock;
         spawnNewBlock(currentBlock.block);
@@ -289,6 +336,8 @@ const deleteFullRow = (row) => {
         if (e.x === row)
             e.content = blockContent.EMPTY;
     });
+    updatePoints();
+    updateGameDelay();
 };
 const movesAllBlocksOneStepDown = (startRow) => {
     for (let x = startRow; x >= 0; x--) {
@@ -343,7 +392,8 @@ const switchBlock = (movingBlock) => {
                 x: centerBlockPart.x + p.x,
                 y: centerBlockPart.y + p.y,
                 isMoving: true,
-                content: blockCon
+                content: blockCon,
+                isShadow: false
             };
             p.x === 0 && p.y === 0 && (newBlockContent.isCenterBlockPart = true);
             newBlock.push(newBlockContent);
@@ -413,24 +463,24 @@ document.addEventListener('keydown', event => {
         case 'c':
             !checkSwitchBlockCollision(movingBlock) && switchBlock(movingBlock);
             break;
+        case ' ':
+            moveBlockOnTheFloor();
+            break;
         default:
             break;
     }
+    setAndUpdateShadowOnTheFloor();
 });
-const moveBlockRight = (movingBlock) => {
-    moveBlockLogic(movingBlock, direction.RIGHT);
-};
-const moveBlockLeft = (movingBlock) => {
-    moveBlockLogic(movingBlock, direction.LEFT);
-};
-const moveBlockDown = (movingBlock) => {
-    blockFallDownLogic(movingBlock);
-};
-const rotateBlockRight = (movingBlock) => {
-    rotateBlockLogic(movingBlock, currentBlock.state, (currentBlock.state + 1) % 4);
-};
-const rotateBlockLeft = (movingBlock) => {
-    rotateBlockLogic(movingBlock, currentBlock.state, (currentBlock.state - 1 + 4) % 4);
+const moveBlockRight = (movingBlock) => moveBlockLogic(movingBlock, direction.RIGHT);
+const moveBlockLeft = (movingBlock) => moveBlockLogic(movingBlock, direction.LEFT);
+const moveBlockDown = (movingBlock) => blockFallDownLogic(movingBlock);
+const rotateBlockRight = (movingBlock) => rotateBlockLogic(movingBlock, currentBlock.state, (currentBlock.state + 1) % 4);
+const rotateBlockLeft = (movingBlock) => rotateBlockLogic(movingBlock, currentBlock.state, (currentBlock.state - 1 + 4) % 4);
+const moveBlockOnTheFloor = () => {
+    let nextBlockTemp = nextBlock;
+    while (nextBlock === nextBlockTemp) {
+        blockFallDownLogic(boardArray.filter(e => e.isMoving));
+    }
 };
 // --------------------------------- Initial function --------------------------------- //
 export const blockLogicInit = () => {

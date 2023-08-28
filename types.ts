@@ -4,6 +4,7 @@ export type boardContent = {
     content: string | null; // contentType
     isMoving: boolean;
     isCenterBlockPart?: boolean;
+    isShadow: boolean;
 }
 
 export type Coordinates = {
@@ -19,7 +20,7 @@ export const blockContent = {
     S: "S",
     T: "T",
     Z: "Z",
-    EMPTY: "EMPTY"
+    EMPTY: "EMPTY",
 }
 
 export const blocksType = {

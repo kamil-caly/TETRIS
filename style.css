@@ -39,6 +39,7 @@ body {
 
 .field_I {
     background-image: url('./assets/TileCyan.png');
+    /* opacity: 0.25; */
     border: none !important;
     width: var(--block-size) !important;
     height: var(--block-size) !important;

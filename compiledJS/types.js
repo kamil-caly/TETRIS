@@ -6,7 +6,7 @@ export const blockContent = {
     S: "S",
     T: "T",
     Z: "Z",
-    EMPTY: "EMPTY"
+    EMPTY: "EMPTY",
 };
 export const blocksType = {
     I_BLOCK: "Block-I",
