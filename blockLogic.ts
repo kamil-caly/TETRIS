@@ -12,12 +12,15 @@ let nextBlock: blockType, holdBlock: blockType, currentBlock: blockType = null;
 const boardArray: boardContent[] = [];
 let GAME_DELAY: number = 800;
 let GAME_POINTS: number = 0;
+let GAME_OVER: boolean = false;
 
 export const getBoardArray = (): boardContent[] => boardArray;
 
 export const getGameDelay = (): number => GAME_DELAY;
 
 export const getGamePoints = (): number => GAME_POINTS;
+
+export const getGameOver = (): boolean => GAME_OVER;
 
 export const initBoard = (): boardContent[] => {
     if(boardArray.length > 0)
@@ -87,7 +90,9 @@ const setAndUpdateShadowOnTheFloor = (): void => {
 }
 
 const spawnNewBlock = (block: string): void => {
+
     const setNewBlock = (blockPos: Coordinates[], content: string, centerBlockPart: Coordinates): void => {
+        checkGameOver(blockPos);
         boardArray.forEach(e => {
             if (blockPos.some(p => p.x === e.x && p.y === e.y)) {
                 e.content = content;
@@ -98,77 +103,56 @@ const spawnNewBlock = (block: string): void => {
         });
     }
 
-    let isPlaceOnBoard: boolean = false;
-
     switch (block) {
 
         case blocksType.O_BLOCK:
             const O_POS = [{x: 0, y: 4}, {x: 0, y: 5}, {x: 1, y: 4}, {x: 1, y: 5}];
-            isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== blockContent.EMPTY && O_POS.some(p => p.x === e.x && p.y === e.y));
-            if(isPlaceOnBoard) {
-                setNewBlock(O_POS, blockContent.O, {x: 0, y: 4});
-            }
+            setNewBlock(O_POS, blockContent.O, {x: 0, y: 4});
             break;
 
         case blocksType.T_BLOCK:
             const T_POS = [{x: 0, y: 4}, {x: 1, y: 3}, {x: 1, y: 4}, {x: 1, y: 5}];
-            isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== blockContent.EMPTY && T_POS.some(p => p.x === e.x && p.y === e.y));
-            if(isPlaceOnBoard) {
-                setNewBlock(T_POS, blockContent.T, {x: 1, y: 4});
-            }
+            setNewBlock(T_POS, blockContent.T, {x: 1, y: 4});
             break;
 
         case blocksType.I_BLOCK:
             const I_POS = [{x: 0, y: 3}, {x: 0, y: 4}, {x: 0, y: 5}, {x: 0, y: 6}];
-            isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== blockContent.EMPTY && I_POS.some(p => p.x === e.x && p.y === e.y));
-            if(isPlaceOnBoard) {
-                setNewBlock(I_POS, blockContent.I, {x: 0, y: 4});
-            }
+            setNewBlock(I_POS, blockContent.I, {x: 0, y: 4});
             break;
 
         case blocksType.J_BLOCK:
             const J_POS = [{x: 0, y: 3}, {x: 1, y: 3}, {x: 1, y: 4}, {x: 1, y: 5}];
-            isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== blockContent.EMPTY && J_POS.some(p => p.x === e.x && p.y === e.y));
-            if(isPlaceOnBoard) {
-                setNewBlock(J_POS, blockContent.J, {x: 1, y: 4});
-            }
+            setNewBlock(J_POS, blockContent.J, {x: 1, y: 4});
             break;
 
         case blocksType.L_BLOCK:
             const L_POS = [{x: 0, y: 5}, {x: 1, y: 3}, {x: 1, y: 4}, {x: 1, y: 5}];
-            isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== blockContent.EMPTY && L_POS.some(p => p.x === e.x && p.y === e.y));
-            if(isPlaceOnBoard) {
-                setNewBlock(L_POS, blockContent.L, {x: 1, y: 4});
-            }
+            setNewBlock(L_POS, blockContent.L, {x: 1, y: 4});
             break;
 
         case blocksType.S_BLOCK:
             const S_POS = [{x: 1, y: 3}, {x: 1, y: 4}, {x: 0, y: 4}, {x: 0, y: 5}];
-            isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== blockContent.EMPTY && S_POS.some(p => p.x === e.x && p.y === e.y));
-            if(isPlaceOnBoard) {
-                setNewBlock(S_POS, blockContent.S, {x: 1, y: 4});
-            }
+            setNewBlock(S_POS, blockContent.S, {x: 1, y: 4});
             break;
 
         case blocksType.Z_BLOCK:
             const Z_POS = [{x: 0, y: 3}, {x: 0, y: 4}, {x: 1, y: 4}, {x: 1, y: 5}];
-            isPlaceOnBoard = !boardArray.some(e => 
-                e.content !== blockContent.EMPTY && Z_POS.some(p => p.x === e.x && p.y === e.y));
-            if(isPlaceOnBoard) {
-                setNewBlock(Z_POS, blockContent.Z, {x: 0, y: 4});
-            }
+            setNewBlock(Z_POS, blockContent.Z, {x: 0, y: 4});
             break;
         default:
             break;
     }
 
     setAndUpdateShadowOnTheFloor();
+}
+
+const checkGameOver = (blockPos: Coordinates[]): void => {
+    for (let pos of blockPos) {
+        if(boardArray.some(e => e.x === pos.x && e.y === pos.y && e.content !== blockContent.EMPTY)) {
+            GAME_OVER = true;
+            break;
+        }
+    }
 }
 
 const updatePoints = () => GAME_POINTS++;

@@ -1,4 +1,4 @@
-import {blockLogicInit, getBoardArray, getGameDelay, blockFallDownLogic, getGamePoints } from "./blockLogic.js"; 
+import {blockLogicInit, getBoardArray, getGameDelay, blockFallDownLogic, getGamePoints, getGameOver } from "./blockLogic.js"; 
 import { blockContent } from "./types.js";
 
 const boardHTML = document.getElementsByClassName('board')[0];
@@ -8,7 +8,7 @@ const cols = Number(getComputedStyle(document.documentElement).getPropertyValue(
 const rows = Number(getComputedStyle(document.documentElement).getPropertyValue('--board-rows'));
 
 const REFRESH_BOARD_DELAY = 10;
-let GAME_INTERVAL: number;
+let GAME_INTERVAL, REFRESH_HTML_INTERVAL: number;
 
 const initHTMLBoard = (): void => {
     for(let x = 0; x < rows; x++) {
@@ -93,6 +93,12 @@ const mainLoop = () => {
         GAME_INTERVAL = setInterval(mainLoop, getGameDelay());
     }
     blockFallDownLogic(getBoardArray().filter(e => e.isMoving));
+    if(getGameOver()) {
+        alert(`Game Over, your score is: ${scoreHTML.innerHTML}!`);
+        clearInterval(GAME_INTERVAL);
+        clearInterval(REFRESH_HTML_INTERVAL);
+        window.location.reload();
+    }
 }
 
 const refreshHTMLBoard = () => {
@@ -106,7 +112,7 @@ const main = () => {
     updateHTMLBoard();
 
     GAME_INTERVAL = setInterval(mainLoop, getGameDelay());
-    setInterval(refreshHTMLBoard, REFRESH_BOARD_DELAY)
+    REFRESH_HTML_INTERVAL = setInterval(refreshHTMLBoard, REFRESH_BOARD_DELAY)
 }
 
 main();
