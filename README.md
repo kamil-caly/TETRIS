@@ -15,7 +15,7 @@ This project is a simple implementation of the classic Tetris game using TypeScr
 - **Hold Functionality**: The player can hold a block and switch it with the current block.
 - **Random Next Block**: The next block is generated randomly and it can not be the same like current.
 
-### Controls
+## Controls
 
 1. **Move Right**: Press the `ArrowRight` key to shift the current block to the right. 
 2. **Move Left**: Press the `ArrowLeft` key to shift the current block to the left.
